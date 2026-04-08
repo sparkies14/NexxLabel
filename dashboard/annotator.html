@@ -194,31 +194,6 @@
 <script src="../js/supabase.js"></script>
 <script src="../js/auth.js"></script>
     <script>
-        // Load user info
-        window.onload = function() {
-            const user = checkAuth();
-            if(user) {
-                document.getElementById('welcomeMsg')
-                    .textContent = 'Welcome back, ' + user.name + '!';
-                document.getElementById('userName')
-                    .textContent = user.name;
-            }
-        }
-
-        // Toggle notifications
-        function toggleNotif() {
-            const dropdown = document
-                .getElementById('notifDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        // Start task
-        function startTask(type) {
-            alert('Opening task: ' + type + 
-                '\n\nTask workspace coming next!');
-        }
-    </script>
-    <script>
     window.onload = async function() {
         try {
             // Check auth
@@ -304,5 +279,6 @@
             'Full annotation workspace coming next!');
     }
 </script>
+    
 </body>
 </html>

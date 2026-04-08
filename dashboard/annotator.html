@@ -190,7 +190,9 @@
         </div>
     </div>
 
-    <script src="../js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
     <script>
         // Load user info
         window.onload = function() {
@@ -216,5 +218,91 @@
                 '\n\nTask workspace coming next!');
         }
     </script>
+    <script>
+    window.onload = async function() {
+        try {
+            // Check auth
+            const profile = await requireAuth();
+            if (!profile) return;
+
+            // Load user info
+            loadUserInfo(profile);
+
+            // Load notifications
+            await loadNotifications(profile.id);
+
+            // Load real tasks
+            const tasks = await getAnnotatorTasks(
+                profile.id
+            );
+            renderTasks(tasks);
+
+        } catch(error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function renderTasks(tasks) {
+        const container = document
+            .querySelector('.task-list');
+        if (!tasks || tasks.length === 0) {
+            container.innerHTML = `
+                <div class="card" 
+                    style="text-align:center;
+                    color:#8892a4; padding:40px;">
+                    No tasks assigned yet
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = tasks.map(task => `
+            <div class="task-item ${
+                task.status === 'rejected' 
+                ? 'rejected' : ''
+            }">
+                <div>
+                    <div style="font-weight:600;
+                        margin-bottom:6px;">
+                        ${task.title}
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <span class="badge badge-${
+                            task.type
+                        }">${task.type}</span>
+                        <span class="badge badge-${
+                            task.priority
+                        }">${task.priority}</span>
+                        ${task.status === 'rejected' 
+                        ? `<span class="badge" 
+                            style="background:rgba(255,77,77,0.2);
+                            color:#ff4d4d;">
+                            ❌ Rejected
+                           </span>` 
+                        : ''}
+                    </div>
+                    ${task.rejection_reason 
+                    ? `<div style="color:#ff4d4d;
+                        font-size:12px;
+                        margin-top:6px;">
+                        Reason: ${task.rejection_reason}
+                       </div>` 
+                    : ''}
+                </div>
+                <button class="btn ${
+                    task.status === 'rejected' 
+                    ? 'btn-danger' : 'btn-primary'
+                }" onclick="startTask('${task.id}')">
+                    ${task.status === 'rejected' 
+                    ? 'Fix Now' : 'Start →'}
+                </button>
+            </div>
+        `).join('');
+    }
+
+    async function startTask(taskId) {
+        alert('Opening task workspace...\n' +
+            'Full annotation workspace coming next!');
+    }
+</script>
 </body>
 </html>

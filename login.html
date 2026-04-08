@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexLabel - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0f1e 0%, #111827 100%);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            background: rgba(26, 34, 53, 0.9);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+        .login-logo {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 36px;
+            font-weight: 800;
+        }
+        .login-logo span {
+            color: #00d4ff;
+        }
+        .login-tagline {
+            text-align: center;
+            color: #8892a4;
+            font-size: 13px;
+            margin-bottom: 32px;
+        }
+        .login-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #00d4ff;
+            color: #0a0f1e;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .login-btn:hover {
+            background: #0099cc;
+            transform: translateY(-1px);
+        }
+        .forgot-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+        .contact-admin {
+            text-align: center;
+            margin-top: 32px;
+            color: #8892a4;
+            font-size: 13px;
+        }
+        .input-icon {
+            position: relative;
+        }
+        .input-icon input {
+            padding-left: 40px;
+        }
+        .input-icon .icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8892a4;
+        }
+        .error-msg {
+            background: rgba(255,77,77,0.1);
+            border: 1px solid #ff4d4d;
+            color: #ff4d4d;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-logo">Nex<span>Label</span></div>
+            <div class="login-tagline">Powering AI Through Precision Labeling</div>
+
+            <div class="login-title">Welcome Back</div>
+
+            <div class="error-msg" id="errorMsg">
+                Invalid email or password. Please try again.
+            </div>
+
+            <div class="input-group">
+                <label>Email Address</label>
+                <div class="input-icon">
+                    <span class="icon">✉</span>
+                    <input type="email" id="email" placeholder="you@example.com">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <div class="input-icon">
+                    <span class="icon">🔒</span>
+                    <input type="password" id="password" placeholder="••••••••">
+                </div>
+            </div>
+
+            <button class="login-btn" onclick="handleLogin()">
+                Sign In →
+            </button>
+
+            <a href="#" class="forgot-link">Forgot password?</a>
+
+            <div class="contact-admin">
+                Don't have an account? 
+                <strong>Contact your administrator</strong>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

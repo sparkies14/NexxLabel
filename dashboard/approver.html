@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexLabel - Approver Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .approve-item {
+            background: #1a2235;
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+        }
+        .approve-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .approve-item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .preview-box {
+            background: #0a0f1e;
+            border: 1px solid rgba(0,212,255,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            color: #8892a4;
+            margin-top: 10px;
+        }
+        .decline-form {
+            display: none;
+            margin-top: 12px;
+        }
+        .decline-form textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0a0f1e;
+            border: 1px solid #ff4d4d;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+            resize: none;
+            outline: none;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">Nex<span>Label</span></div>
+        <ul class="sidebar-menu">
+            <li><a href="approver.html" class="active">📊 Dashboard</a></li>
+            <li><a href="#">✅ Approval Queue</a></li>
+            <li><a href="#">📋 Approved</a></li>
+            <li><a href="#">❌ Declined</a></li>
+            <li><a href="#">✏️ Annotate Tasks</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Topbar -->
+        <div class="topbar">
+            <div>
+                <h1 id="welcomeMsg">Welcome back!</h1>
+                <p style="color:#8892a4; font-size:13px;">
+                    Approval queue for today
+                </p>
+            </div>
+            <div class="topbar-right">
+                <div class="user-info">
+                    <span id="userName">Anna</span>
+                    <span class="role-badge">Approver</span>
+                    <button class="btn btn-outline"
+                        onclick="logout()"
+                        style="padding:6px 12px; font-size:12px;">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Pending Approval</div>
+                <div class="stat-number">8</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Approved Today</div>
+                <div class="stat-number"
+                    style="color:#00c48c;">15</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Declined Today</div>
+                <div class="stat-number"
+                    style="color:#ff4d4d;">2</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Sent to Client</div>
+                <div class="stat-number"
+                    style="color:#a78bfa;">13</div>
+            </div>
+        </div>
+
+        <!-- Approval Queue -->
+        <div class="section-title">Approval Queue</div>
+
+        <!-- Approve Item 1 -->
+        <div class="approve-item">
+            <div class="approve-item-header">
+                <div>
+                    <div style="font-weight:700;
+                        margin-bottom:6px;">
+                        Product Catalog Annotation
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <span class="badge badge-image">
+                            Image
+                        </span>
+                        <span class="badge badge-high">
+                            High
+                        </span>
+                    </div>
+                </div>
+                <div style="font-size:12px;
+                    color:#8892a4;">
+                    1 hour ago
+                </div>
+            </div>
+            <div style="font-size:13px;
+                color:#8892a4; margin-bottom:4px;">
+                Annotator: <strong
+                style="color:white;">John Doe</strong>
+            </div>
+            <div style="font-size:13px;
+                color:#8892a4;">
+                Reviewer: <strong
+                style="color:white;">Sarah Chen</strong>
+            </div>
+            <div class="preview-box">
+                📋 1,250 images labeled — 
+                Bounding boxes applied to all items.
+                Reviewer passed with 98% accuracy score.
+            </div>
+            <div class="approve-item-actions">
+                <button class="btn btn-success"
+                    onclick="approveTask(this)">
+                    ✅ Approve & Send to Client
+                </button>
+                <button class="btn btn-danger"
+                    onclick="showDeclineForm(this)">
+                    ❌ Decline
+                </button>
+            </div>
+            <div class="decline-form">
+                <textarea rows="3"
+                    placeholder="Enter reason for declining — Reviewer will be notified...">
+                </textarea>
+                <div style="display:flex;
+                    gap:8px; margin-top:8px;">
+                    <button class="btn btn-danger"
+                        onclick="confirmDecline(this)">
+                        Confirm Decline & Notify Reviewer
+                    </button>
+                    <button class="btn btn-outline"
+                        onclick="cancelDecline(this)">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approve Item 2 -->
+        <div class="approve-item">
+            <div class="approve-item-header">
+                <div>
+                    <div style="font-weight:700;
+                        margin-bottom:6px;">
+                        Sentiment Analysis Dataset
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <span class="badge badge-text">
+                            Text
+                        </span>
+                        <span class="badge badge-medium">
+                            Medium
+                        </span>
+                    </div>
+                </div>
+                <div style="font-size:12px;
+                    color:#8892a4;">
+                    3 hours ago
+                </div>
+            </div>
+            <div style="font-size:13px;
+                color:#8892a4; margin-bottom:4px;">
+                Annotator: <strong
+                style="color:white;">Maria Santos</strong>
+            </div>
+            <div style="font-size:13px;
+                color:#8892a4;">
+                Reviewer: <strong
+                style="color:white;">Sarah Chen</strong>
+            </div>
+            <div class="preview-box">
+                📋 580 text samples labeled — 
+                Positive/Negative/Neutral classifications.
+                Reviewer passed with 96% accuracy score.
+            </div>
+            <div class="approve-item-actions">
+                <button class="btn btn-success"
+                    onclick="approveTask(this)">
+                    ✅ Approve & Send to Client
+                </button>
+                <button class="btn btn-danger"
+                    onclick="showDeclineForm(this)">
+                    ❌ Decline
+                </button>
+            </div>
+            <div class="decline-form">
+                <textarea rows="3"
+                    placeholder="Enter reason for declining — Reviewer will be notified...">
+                </textarea>
+                <div style="display:flex;
+                    gap:8px; margin-top:8px;">
+                    <button class="btn btn-danger"
+                        onclick="confirmDecline(this)">
+                        Confirm Decline & Notify Reviewer
+                    </button>
+                    <button class="btn btn-outline"
+                        onclick="cancelDecline(this)">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        window.onload = function() {
+            const user = checkAuth();
+            if(user) {
+                document.getElementById('welcomeMsg')
+                    .textContent =
+                    'Welcome back, ' + user.name + '!';
+                document.getElementById('userName')
+                    .textContent = user.name;
+            }
+        }
+
+        function approveTask(btn) {
+            const item = btn.closest('.approve-item');
+            item.style.borderColor = '#00c48c';
+            item.style.opacity = '0.6';
+            btn.textContent = '✅ Approved — Sent to Client';
+            btn.disabled = true;
+        }
+
+        function showDeclineForm(btn) {
+            const item = btn.closest('.approve-item');
+            const form = item.querySelector('.decline-form');
+            form.style.display = 'block';
+        }
+
+        function cancelDecline(btn) {
+            const item = btn.closest('.approve-item');
+            const form = item.querySelector('.decline-form');
+            form.style.display = 'none';
+        }
+
+        function confirmDecline(btn) {
+            const item = btn.closest('.approve-item');
+            const reason = item.querySelector('textarea').value;
+            if(!reason) {
+                alert('Please enter a reason!');
+                return;
+            }
+            item.style.borderColor = '#ff4d4d';
+            item.style.opacity = '0.6';
+            alert('Declined! Reviewer will be notified.\nReason: ' + reason);
+        }
+    </script>
+</body>
+</html>

@@ -145,6 +145,59 @@
         </div>
     </div>
 
-    <script src="js/main.js"></script>
+    <!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+<script>
+    // Check if already logged in
+    window.onload = async function() {
+        const session = await getSession();
+        if (session) {
+            const profile = await getCurrentProfile();
+            if (profile) redirectByRole(profile.role);
+        }
+    }
+
+    // Handle Login
+    async function handleLogin() {
+        const email = document
+            .getElementById('email').value;
+        const password = document
+            .getElementById('password').value;
+        const errorMsg = document
+            .getElementById('errorMsg');
+        const btn = document.querySelector('.login-btn');
+
+        if (!email || !password) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = 
+                'Please enter email and password';
+            return;
+        }
+
+        // Show loading
+        btn.textContent = 'Signing in...';
+        btn.disabled = true;
+        errorMsg.style.display = 'none';
+
+        try {
+            await signIn(email, password);
+            const profile = await getCurrentProfile();
+            redirectByRole(profile.role);
+        } catch(error) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = 
+                'Invalid email or password';
+            btn.textContent = 'Sign In →';
+            btn.disabled = false;
+        }
+    }
+
+    // Enter key support
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') handleLogin();
+    });
+</script>
 </body>
 </html>

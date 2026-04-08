@@ -26,12 +26,22 @@ async function signIn(email, password) {
     return data;
 }
 
-// Sign Out
-async function signOut() {
-    const { error } = await supabaseClient
-        .auth.signOut();
-    if (error) throw error;
-    window.location.href = '../login.html';
+// Logout function called by dashboard buttons
+async function logout() {
+    try {
+        await supabaseClient.auth.signOut();
+        // Check if we are in dashboard folder
+        const inDashboard = window.location.pathname
+            .includes('dashboard');
+        if (inDashboard) {
+            window.location.href = '../login.html';
+        } else {
+            window.location.href = 'login.html';
+        }
+    } catch(error) {
+        console.error('Logout error:', error);
+        window.location.href = '../login.html';
+    }
 }
 
 // Get Current Session

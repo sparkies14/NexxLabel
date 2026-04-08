@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+        content="width=device-width, 
+        initial-scale=1.0">
+    <title>NexLabel - Task Workspace</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            height: calc(100vh - 100px);
+        }
+        .work-area {
+            background: #1a2235;
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 12px;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        .label-panel {
+            background: #1a2235;
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid 
+                rgba(0,212,255,0.1);
+        }
+        .text-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #e2e8f0;
+            background: #0a0f1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .label-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .label-option {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid 
+                rgba(0,212,255,0.15);
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .label-option:hover {
+            border-color: #00d4ff;
+            background: rgba(0,212,255,0.05);
+        }
+        .label-option.selected {
+            border-color: #00d4ff;
+            background: rgba(0,212,255,0.15);
+            color: #00d4ff;
+        }
+        .notes-area {
+            width: 100%;
+            padding: 12px;
+            background: #0a0f1e;
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .notes-area:focus {
+            border-color: #00d4ff;
+        }
+        .progress-steps {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .step {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(0,212,255,0.15);
+        }
+        .step.done {
+            background: #00d4ff;
+        }
+        .step.current {
+            background: #00c48c;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            Nex<span>Label</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="annotator.html">
+                    ← Back to Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="#" class="active">
+                    ✏️ Current Task
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="topbar">
+            <div>
+                <h1 id="taskTitle">
+                    Loading task...
+                </h1>
+                <p style="color:#8892a4;
+                    font-size:13px;">
+                    Text Annotation Workspace
+                </p>
+            </div>
+            <div style="display:flex;
+                align-items:center; gap:12px;">
+                <span id="userName"
+                    style="color:#8892a4;">
+                </span>
+                <span class="role-badge">
+                    Annotator
+                </span>
+                <button class="btn btn-outline"
+                    onclick="logout()"
+                    style="padding:6px 12px;
+                    font-size:12px;">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps" id="progressSteps">
+        </div>
+
+        <!-- Workspace -->
+        <div class="workspace">
+            <!-- Work Area -->
+            <div class="work-area">
+                <div class="task-header">
+                    <div>
+                        <div style="font-weight:700;
+                            font-size:16px;"
+                            id="itemTitle">
+                            Item 1 of 5
+                        </div>
+                        <div style="color:#8892a4;
+                            font-size:13px;"
+                            id="itemType">
+                            Text Classification
+                        </div>
+                    </div>
+                    <div style="display:flex;
+                        gap:8px;">
+                        <span class="badge badge-text">
+                            Text
+                        </span>
+                        <span class="badge badge-medium">
+                            Medium
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Text to annotate -->
+                <div class="text-content" 
+                    id="textContent">
+                    Loading content...
+                </div>
+
+                <!-- Navigation -->
+                <div class="nav-buttons">
+                    <button class="btn btn-outline"
+                        onclick="prevItem()"
+                        id="prevBtn"
+                        style="display:none;">
+                        ← Previous
+                    </button>
+                    <button class="btn btn-primary"
+                        onclick="nextItem()"
+                        id="nextBtn">
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Label Panel -->
+            <div class="label-panel">
+                <div style="font-weight:700;
+                    font-size:16px;">
+                    Select Label
+                </div>
+
+                <div class="label-options"
+                    id="labelOptions">
+                    <button class="label-option"
+                        onclick="selectLabel(
+                            'Positive', this
+                        )">
+                        😊 Positive
+                    </button>
+                    <button class="label-option"
+                        onclick="selectLabel(
+                            'Negative', this
+                        )">
+                        😞 Negative
+                    </button>
+                    <button class="label-option"
+                        onclick="selectLabel(
+                            'Neutral', this
+                        )">
+                        😐 Neutral
+                    </button>
+                    <button class="label-option"
+                        onclick="selectLabel(
+                            'Mixed', this
+                        )">
+                        🤔 Mixed
+                    </button>
+                </div>
+
+                <div>
+                    <div style="font-weight:600;
+                        font-size:14px;
+                        margin-bottom:8px;">
+                        Notes (optional)
+                    </div>
+                    <textarea class="notes-area"
+                        id="notesArea"
+                        rows="4"
+                        placeholder="Add any notes about this annotation...">
+                    </textarea>
+                </div>
+
+                <div style="padding:12px;
+                    background:rgba(0,212,255,0.05);
+                    border-radius:8px;
+                    font-size:13px;
+                    color:#8892a4;">
+                    <strong style="color:white;">
+                        Selected:
+                    </strong>
+                    <span id="selectedLabel"
+                        style="color:#00d4ff;">
+                        None
+                    </span>
+                </div>
+
+                <button class="btn btn-success"
+                    onclick="submitTask()"
+                    id="submitBtn"
+                    style="width:100%; padding:14px;">
+                    ✅ Submit for Review
+                </button>
+
+                <button class="btn btn-outline"
+                    onclick="saveProgress()"
+                    style="width:100%;">
+                    💾 Save Progress
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let currentTask = null;
+        let currentItem = 0;
+        let annotations = [];
+
+        // Sample text items to annotate
+        const sampleItems = [
+            {
+                id: 1,
+                text: "The product arrived quickly and " +
+                    "was exactly as described. " +
+                    "Very happy with my purchase!",
+                label: null
+            },
+            {
+                id: 2,
+                text: "Terrible customer service. " +
+                    "Waited 2 weeks for delivery " +
+                    "and the item was damaged.",
+                label: null
+            },
+            {
+                id: 3,
+                text: "Package arrived on time. " +
+                    "Product is okay, nothing special " +
+                    "but does the job.",
+                label: null
+            },
+            {
+                id: 4,
+                text: "Love the quality but the price " +
+                    "is too high for what you get. " +
+                    "Mixed feelings overall.",
+                label: null
+            },
+            {
+                id: 5,
+                text: "Outstanding product! " +
+                    "Exceeded all my expectations. " +
+                    "Will definitely order again.",
+                label: null
+            }
+        ];
+
+        window.onload = async function() {
+            try {
+                const profile = await requireAuth();
+                if (!profile) return;
+                loadUserInfo(profile);
+
+                // Get task from URL params
+                const params = new URLSearchParams(
+                    window.location.search
+                );
+                const taskId = params.get('taskId');
+
+                if (taskId) {
+                    // Load real task from Supabase
+                    currentTask = { id: taskId };
+                }
+
+                // Build progress steps
+                buildProgressSteps();
+                loadItem(0);
+
+            } catch(error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function buildProgressSteps() {
+            const container = document
+                .getElementById('progressSteps');
+            container.innerHTML = sampleItems
+                .map((item, i) => `
+                    <div class="step ${
+                        i === 0 ? 'current' : ''
+                    }" id="step-${i}">
+                    </div>
+                `).join('');
+        }
+
+        function loadItem(index) {
+            const item = sampleItems[index];
+            currentItem = index;
+
+            // Update content
+            document.getElementById('textContent')
+                .textContent = item.text;
+            document.getElementById('itemTitle')
+                .textContent = `Item ${index + 1} 
+                    of ${sampleItems.length}`;
+
+            // Reset label selection
+            document.querySelectorAll('.label-option')
+                .forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+
+            // Restore saved label if exists
+            if (item.label) {
+                document.querySelectorAll(
+                    '.label-option'
+                ).forEach(btn => {
+                    if (btn.textContent.includes(
+                        item.label
+                    )) {
+                        btn.classList.add('selected');
+                    }
+                });
+                document.getElementById(
+                    'selectedLabel'
+                ).textContent = item.label;
+            } else {
+                document.getElementById(
+                    'selectedLabel'
+                ).textContent = 'None';
+            }
+
+            // Update nav buttons
+            document.getElementById('prevBtn')
+                .style.display = 
+                index > 0 ? 'block' : 'none';
+
+            const isLast = index === 
+                sampleItems.length - 1;
+            document.getElementById('nextBtn')
+                .textContent = isLast 
+                ? 'Last Item' : 'Next →';
+            document.getElementById('nextBtn')
+                .disabled = isLast;
+
+            // Update progress steps
+            sampleItems.forEach((_, i) => {
+                const step = document
+                    .getElementById('step-' + i);
+                if (!step) return;
+                step.className = 'step';
+                if (i < index) step.classList
+                    .add('done');
+                if (i === index) step.classList
+                    .add('current');
+            });
+        }
+
+        function selectLabel(label, btn) {
+            // Deselect all
+            document.querySelectorAll('.label-option')
+                .forEach(b => {
+                    b.classList.remove('selected');
+                });
+
+            // Select clicked
+            btn.classList.add('selected');
+            sampleItems[currentItem].label = label;
+            document.getElementById('selectedLabel')
+                .textContent = label;
+        }
+
+        function nextItem() {
+            if (!sampleItems[currentItem].label) {
+                alert('Please select a label first!');
+                return;
+            }
+            if (currentItem < sampleItems.length - 1) {
+                loadItem(currentItem + 1);
+            }
+        }
+
+        function prevItem() {
+            if (currentItem > 0) {
+                loadItem(currentItem - 1);
+            }
+        }
+
+        async function submitTask() {
+            // Check all items labeled
+            const unlabeled = sampleItems.filter(
+                item => !item.label
+            );
+            if (unlabeled.length > 0) {
+                alert(`Please label all items first!\n` +
+                    `${unlabeled.length} items remaining.`
+                );
+                return;
+            }
+
+            try {
+                const btn = document
+                    .getElementById('submitBtn');
+                btn.textContent = 'Submitting...';
+                btn.disabled = true;
+
+                // Submit to Supabase if real task
+                if (currentTask && currentTask.id) {
+                    await submitTask(currentTask.id);
+                }
+
+                alert('Task submitted successfully!\n' +
+                    'Your work will be reviewed by QA.');
+                window.location.href = 
+                    'annotator.html';
+
+            } catch(error) {
+                alert('Error submitting: ' + 
+                    error.message);
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem(
+                'nexxlabel_progress',
+                JSON.stringify(sampleItems)
+            );
+            alert('Progress saved! ' +
+                'You can continue later.');
+        }
+    </script>
+</body>
+</html>

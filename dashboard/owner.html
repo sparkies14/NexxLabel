@@ -133,7 +133,7 @@
                         👑 Owner
                     </span>
                     <button class="btn btn-outline"
-                        onclick="logout()"
+                        onclick="signOut()"
                         style="padding:6px 12px;
                         font-size:12px;">
                         Logout
@@ -424,51 +424,308 @@
 <script src="../js/supabase.js"></script>
 <script src="../js/auth.js"></script>
     <script>
-        window.onload = function() {
-            const user = checkAuth();
-            if(user) {
-                document.getElementById('welcomeMsg')
-                    .textContent =
-                    'Welcome back, ' + user.name + '!';
-                document.getElementById('userName')
-                    .textContent = user.name;
+    window.onload = async function() {
+        try {
+            const profile = await requireAuth();
+            if (!profile) return;
+
+            // Check if owner or subowner
+            if (profile.role !== 'owner' && 
+                profile.role !== 'subowner') {
+                window.location.href = 'annotator.html';
+                return;
+            }
+
+            loadUserInfo(profile);
+
+            // Hide delete buttons for subowner
+            if (profile.role === 'subowner') {
+                document.querySelectorAll('.delete-btn')
+                    .forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+            }
+
+            // Update role badge for subowner
+            if (profile.role === 'subowner') {
+                const badge = document
+                    .querySelector('.role-badge');
+                if (badge) {
+                    badge.textContent = 'Sub-Owner';
+                    badge.style.background = 
+                        'rgba(0,212,255,0.1)';
+                    badge.style.borderColor = 
+                        '#00d4ff';
+                    badge.style.color = '#00d4ff';
+                }
+            }
+
+            await loadNotifications(profile.id);
+            await loadDashboardStats();
+            await loadProjects();
+            await loadTeam();
+
+        } catch(error) {
+            console.error('Error:', error);
+        }
+    }
+
+    async function loadDashboardStats() {
+        try {
+            const projects = await getAllProjects();
+            const team = await getTeamMembers();
+
+            // Update stats
+            document.querySelectorAll('.stat-number')
+                [0].textContent = projects.length;
+            document.querySelectorAll('.stat-number')
+                [1].textContent = team.length;
+        } catch(error) {
+            console.error('Stats error:', error);
+        }
+    }
+
+    async function loadProjects() {
+        try {
+            const projects = await getAllProjects();
+            const tbody = document
+                .querySelector('.projects-table tbody');
+            if (!tbody) return;
+
+            if (projects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" 
+                            style="text-align:center;
+                            color:#8892a4;padding:30px;">
+                            No projects yet — 
+                            Create your first project!
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = projects.map(p => `
+                <tr>
+                    <td>
+                        <strong>${p.name}</strong>
+                    </td>
+                    <td style="color:#8892a4;">
+                        ${p.client ? 
+                            p.client.company || 
+                            p.client.full_name 
+                            : 'No client'}
+                    </td>
+                    <td>
+                        <div style="display:flex;
+                            align-items:center;
+                            gap:10px;">
+                            <div class="progress-bar"
+                                style="width:120px;">
+                                <div class="progress-fill"
+                                    style="width:${
+                                        p.progress
+                                    }%;">
+                                </div>
+                            </div>
+                            <span style="font-size:13px;">
+                                ${p.progress}%
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-${
+                            p.status === 'active' 
+                            ? 'progress' 
+                            : p.status === 'completed'
+                            ? 'completed' 
+                            : 'review'
+                        }">
+                            ${p.status === 'active' 
+                            ? 'In Progress'
+                            : p.status === 'completed'
+                            ? 'Completed'
+                            : 'Under Review'}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex;
+                            gap:8px;">
+                            <button class="btn btn-outline"
+                                style="padding:4px 10px;
+                                font-size:12px;">
+                                View
+                            </button>
+                            <button 
+                                class="delete-btn"
+                                onclick="confirmDelete(
+                                    '${p.id}', this
+                                )">
+                                🗑 Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+        } catch(error) {
+            console.error('Projects error:', error);
+        }
+    }
+
+    async function loadTeam() {
+        try {
+            const team = await getTeamMembers();
+            const grid = document
+                .querySelector('.team-grid');
+            if (!grid) return;
+
+            if (team.length === 0) {
+                grid.innerHTML = `
+                    <div style="color:#8892a4;
+                        grid-column:span 3;
+                        text-align:center;
+                        padding:30px;">
+                        No team members yet
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = team.map(member => `
+                <div class="team-card">
+                    <div class="team-avatar">
+                        ${member.full_name
+                            .charAt(0)
+                            .toUpperCase()}
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">
+                            ${member.full_name}
+                        </div>
+                        <span class="role-badge"
+                            style="font-size:11px;">
+                            ${member.role
+                                .charAt(0)
+                                .toUpperCase() + 
+                                member.role.slice(1)}
+                        </span>
+                    </div>
+                    <button class="delete-btn owner-only"
+                        onclick="confirmDeleteMember(
+                            '${member.id}', this
+                        )">
+                        🗑
+                    </button>
+                </div>
+            `).join('');
+
+        } catch(error) {
+            console.error('Team error:', error);
+        }
+    }
+
+    async function confirmDelete(projectId, btn) {
+        if(confirm(
+            'Delete this project? Cannot be undone!'
+        )) {
+            try {
+                await deleteProject(projectId);
+                await loadProjects();
+                alert('Project deleted!');
+            } catch(error) {
+                alert('Error deleting project: ' + 
+                    error.message);
             }
         }
+    }
 
-        function showTab(tab, btn) {
-            document.getElementById('tab-projects')
-                .style.display = 'none';
-            document.getElementById('tab-team')
-                .style.display = 'none';
-            document.getElementById('tab-' + tab)
-                .style.display = 'block';
-            document.querySelectorAll('.tab')
-                .forEach(t => t.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        function deleteProject(btn) {
-            if(confirm('Delete this project? This cannot be undone!')) {
-                const row = btn.closest('tr');
-                row.style.opacity = '0.3';
-                row.style.textDecoration = 'line-through';
+    async function confirmDeleteMember(userId, btn) {
+        if(confirm('Remove this team member?')) {
+            try {
+                await deleteUser(userId);
+                await loadTeam();
+                alert('Member removed!');
+            } catch(error) {
+                alert('Error removing member: ' + 
+                    error.message);
             }
         }
+    }
 
-        function deleteMember(btn) {
-            if(confirm('Remove this team member?')) {
-                const card = btn.closest('.team-card');
-                card.style.opacity = '0.3';
+    function showTab(tab, btn) {
+        document.getElementById('tab-projects')
+            .style.display = 'none';
+        document.getElementById('tab-team')
+            .style.display = 'none';
+        document.getElementById('tab-' + tab)
+            .style.display = 'block';
+        document.querySelectorAll('.tab')
+            .forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    async function createProject() {
+        const name = prompt('Enter project name:');
+        if (!name) return;
+
+        try {
+            const profile = await getCurrentProfile();
+            const clients = await getClients();
+
+            if (clients.length === 0) {
+                alert('No clients found! ' + 
+                    'Add a client first.');
+                return;
             }
-        }
 
-        function createProject() {
-            alert('Create Project — Coming soon!\nWill connect to Supabase.');
-        }
+            // Simple client picker
+            const clientList = clients.map(
+                (c, i) => `${i + 1}. ${c.full_name}`
+            ).join('\n');
+            const pick = prompt(
+                'Pick client number:\n' + clientList
+            );
+            if (!pick) return;
 
-        function addMember() {
-            alert('Add Member — Coming soon!\nWill connect to Supabase.');
+            const client = clients[parseInt(pick) - 1];
+            if (!client) {
+                alert('Invalid selection');
+                return;
+            }
+
+            await createProject(
+                name, client.id, profile.id
+            );
+            await loadProjects();
+            alert('Project created!');
+
+        } catch(error) {
+            alert('Error: ' + error.message);
         }
-    </script>
+    }
+
+    async function addMember() {
+        const name = prompt('Full name:');
+        if (!name) return;
+        const email = prompt('Email:');
+        if (!email) return;
+        const password = prompt('Password:');
+        if (!password) return;
+        const role = prompt(
+            'Role (subowner/approver/reviewer/annotator):'
+        );
+        if (!role) return;
+
+        try {
+            await createUser(
+                email, password, name, role, 'NexLabel'
+            );
+            await loadTeam();
+            alert('Team member added!');
+        } catch(error) {
+            alert('Error: ' + error.message);
+        }
+    }
+</script>
 </body>
 </html>

@@ -106,7 +106,7 @@
                         Client
                     </span>
                     <button class="btn btn-outline"
-                        onclick="logout()"
+                        onclick="signOut()"
                         style="padding:6px 12px;
                         font-size:12px;">
                         Logout
@@ -292,37 +292,188 @@
         </div>
     </div>
 
-    <script src="../js/main.js"></script>
-    <script>
-        window.onload = function() {
-            const user = checkAuth();
-            if(user) {
-                document.getElementById('welcomeMsg')
-                    .textContent =
-                    'Welcome, ' + user.name + '!';
-                document.getElementById('userName')
-                    .textContent = user.name;
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+    window.onload = async function() {
+        try {
+            const { data } = await supabaseClient
+                .auth.getSession();
+
+            if (!data.session) {
+                window.location.replace('../login.html');
+                return;
             }
-        }
 
-        function triggerUpload() {
-            document.getElementById('fileInput').click();
-        }
+            const profile = await getCurrentProfile();
 
-        function handleUpload(input) {
-            const file = input.files[0];
-            if(file) {
-                alert('File selected: ' + file.name +
-                    '\n\nReal upload coming when ' +
-                    'we connect Supabase!');
+            if (!profile) {
+                window.location.replace('../login.html');
+                return;
             }
-        }
 
-        function downloadProject() {
-            alert('Downloading completed project...\n' +
-                'Real download coming when ' +
-                'we connect Supabase!');
+            if (profile.role !== 'client') {
+                window.location.replace('owner.html');
+                return;
+            }
+
+            loadUserInfo(profile);
+            await loadNotifications(profile.id);
+            await loadClientStats(profile.id);
+            await loadClientProjects(profile.id);
+
+        } catch(error) {
+            console.error('Error:', error);
+            window.location.replace('../login.html');
         }
-    </script>
+    }
+
+    async function loadClientStats(clientId) {
+        try {
+            const projects = await getClientProjects(
+                clientId
+            );
+            const total = projects.length;
+            const inProgress = projects.filter(
+                p => p.status === 'active'
+            ).length;
+            const completed = projects.filter(
+                p => p.status === 'completed'
+            ).length;
+            const underReview = projects.filter(
+                p => p.status === 'under_review'
+            ).length;
+
+            const stats = document
+                .querySelectorAll('.stat-number');
+            if (stats[0]) stats[0].textContent = total;
+            if (stats[1]) stats[1].textContent = 
+                inProgress;
+            if (stats[2]) stats[2].textContent = 
+                completed;
+            if (stats[3]) stats[3].textContent = 
+                underReview;
+
+        } catch(error) {
+            console.error('Stats error:', error);
+        }
+    }
+
+    async function loadClientProjects(clientId) {
+        try {
+            const projects = await getClientProjects(
+                clientId
+            );
+            const tbody = document
+                .querySelector('.projects-table tbody');
+            if (!tbody) return;
+
+            if (projects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5"
+                            style="text-align:center;
+                            color:#8892a4;
+                            padding:40px;">
+                            No projects yet!
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = projects.map(p => `
+                <tr>
+                    <td>
+                        <strong>${p.name}</strong>
+                    </td>
+                    <td style="color:#8892a4;">
+                        ${new Date(p.created_at)
+                            .toLocaleDateString()}
+                    </td>
+                    <td>
+                        <div style="display:flex;
+                            align-items:center;
+                            gap:10px;">
+                            <div class="progress-bar"
+                                style="width:100px;">
+                                <div class="progress-fill"
+                                    style="width:${
+                                        p.progress
+                                    }%;
+                                    background:${
+                                        p.progress===100
+                                        ? '#00c48c'
+                                        : p.progress < 50
+                                        ? '#ffb020'
+                                        : '#00d4ff'
+                                    };">
+                                </div>
+                            </div>
+                            <span style="font-size:13px;">
+                                ${p.progress}%
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-${
+                            p.status === 'active'
+                            ? 'progress'
+                            : p.status === 'completed'
+                            ? 'completed'
+                            : 'review'
+                        }">
+                            ${p.status === 'active'
+                            ? 'In Progress'
+                            : p.status === 'completed'
+                            ? 'Completed'
+                            : 'Under Review'}
+                        </span>
+                    </td>
+                    <td>
+                        ${p.status === 'completed'
+                        ? `<button
+                            class="btn btn-success"
+                            style="padding:6px 12px;
+                            font-size:12px;"
+                            onclick="downloadProject(
+                                '${p.id}','${p.name}'
+                            )">
+                            📥 Download
+                           </button>`
+                        : `<button
+                            class="btn btn-outline"
+                            style="padding:6px 12px;
+                            font-size:12px;
+                            opacity:0.4;"
+                            disabled>
+                            Not Ready
+                           </button>`}
+                    </td>
+                </tr>
+            `).join('');
+
+        } catch(error) {
+            console.error('Projects error:', error);
+        }
+    }
+
+    function triggerUpload() {
+        document.getElementById('fileInput').click();
+    }
+
+    function handleUpload(input) {
+        const file = input.files[0];
+        if (file) {
+            alert('File: ' + file.name +
+                '\nUpload coming with Supabase Storage!');
+        }
+    }
+
+    async function downloadProject(id, name) {
+        alert('Downloading: ' + name +
+            '\nComing with Supabase Storage!');
+    }
+</script>
 </body>
 </html>

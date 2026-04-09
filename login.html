@@ -152,12 +152,21 @@
 <script>
     // Check if already logged in
     window.onload = async function() {
-        const session = await getSession();
-        if (session) {
-            const profile = await getCurrentProfile();
-            if (profile) redirectByRole(profile.role);
+    try {
+        const { data } = await supabaseClient
+            .auth.getSession();
+        if (data.session) {
+            const profile = 
+                await getCurrentProfile();
+            if (profile) {
+                redirectByRole(profile.role);
+                return;
+            }
         }
+    } catch(error) {
+        console.error('Error:', error);
     }
+}
 
     // Handle Login
     async function handleLogin() {

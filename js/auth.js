@@ -3,32 +3,44 @@
 // Check if user is logged in
 // Redirect to login if not
 async function requireAuth() {
-    const session = await getSession();
-    if (!session) {
-        window.location.href = '../login.html';
+    try {
+        const session = await getSession();
+        if (!session) {
+            window.location.replace('../login.html');
+            return null;
+        }
+        const profile = await getCurrentProfile();
+        if (!profile) {
+            window.location.replace('../login.html');
+            return null;
+        }
+        return profile;
+    } catch(error) {
+        console.error('Auth error:', error);
+        window.location.replace('../login.html');
         return null;
     }
-    const profile = await getCurrentProfile();
-    if (!profile) {
-        window.location.href = '../login.html';
-        return null;
-    }
-    return profile;
 }
 
 // Check auth for root pages (login.html)
 async function requireAuthRoot() {
-    const session = await getSession();
-    if (!session) {
-        window.location.href = 'login.html';
+    try {
+        const session = await getSession();
+        if (!session) {
+            window.location.replace('login.html');
+            return null;
+        }
+        const profile = await getCurrentProfile();
+        if (!profile) {
+            window.location.replace('login.html');
+            return null;
+        }
+        return profile;
+    } catch(error) {
+        console.error('Auth error:', error);
+        window.location.replace('login.html');
         return null;
     }
-    const profile = await getCurrentProfile();
-    if (!profile) {
-        window.location.href = 'login.html';
-        return null;
-    }
-    return profile;
 }
 
 // Redirect after login based on role
@@ -36,45 +48,50 @@ function redirectByRole(role) {
     switch(role) {
         case 'owner':
         case 'subowner':
-            window.location.href = 
-                'dashboard/owner.html';
+            window.location.replace(
+                'dashboard/owner.html'
+            );
             break;
         case 'approver':
-            window.location.href = 
-                'dashboard/approver.html';
+            window.location.replace(
+                'dashboard/approver.html'
+            );
             break;
         case 'reviewer':
-            window.location.href = 
-                'dashboard/reviewer.html';
+            window.location.replace(
+                'dashboard/reviewer.html'
+            );
             break;
         case 'annotator':
-            window.location.href = 
-                'dashboard/annotator.html';
+            window.location.replace(
+                'dashboard/annotator.html'
+            );
             break;
         case 'client':
-            window.location.href = 
-                'dashboard/client.html';
+            window.location.replace(
+                'dashboard/client.html'
+            );
             break;
         default:
-            window.location.href = 'login.html';
+            window.location.replace('login.html');
     }
 }
 
 // Load user info into page
 function loadUserInfo(profile) {
-    // Set name
-    const nameEl = document.getElementById('userName');
-    if (nameEl) nameEl.textContent = profile.full_name;
+    const nameEl = document
+        .getElementById('userName');
+    if (nameEl) nameEl.textContent = 
+        profile.full_name;
 
-    // Set welcome message
     const welcomeEl = document
         .getElementById('welcomeMsg');
     if (welcomeEl) {
         welcomeEl.textContent = 
-            'Welcome back, ' + profile.full_name + '!';
+            'Welcome back, ' + 
+            profile.full_name + '!';
     }
 
-    // Set role badge
     const roleEl = document
         .getElementById('roleBadge');
     if (roleEl) {
@@ -103,7 +120,7 @@ async function loadNotifications(userId) {
             if (notifs.length === 0) {
                 listEl.innerHTML = 
                     '<div style="color:#8892a4;' +
-                    'font-size:13px;padding:10px;">'+
+                    'font-size:13px;padding:10px;">' +
                     'No new notifications</div>';
             } else {
                 listEl.innerHTML = notifs.map(n => `
@@ -121,7 +138,7 @@ async function loadNotifications(userId) {
             }
         }
     } catch(e) {
-        console.error('Error loading notifications:', e);
+        console.error('Notifications error:', e);
     }
 }
 
@@ -137,5 +154,26 @@ function toggleNotif() {
         .getElementById('notifDropdown');
     if (dropdown) {
         dropdown.classList.toggle('show');
+    }
+}
+
+// Logout - works from any page
+async function logout() {
+    try {
+        await supabaseClient.auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+
+        const inDashboard = window.location
+            .pathname.includes('dashboard');
+
+        if (inDashboard) {
+            window.location.replace('../login.html');
+        } else {
+            window.location.replace('login.html');
+        }
+    } catch(error) {
+        console.error('Logout error:', error);
+        window.location.replace('../login.html');
     }
 }

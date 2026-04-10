@@ -9,8 +9,6 @@
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
         :root{
             --black:#04060a;
-            --black2:#080c12;
-            --black3:#0d1018;
             --gold:#c9a84c;
             --gold2:#e8c96d;
             --gold3:#f5e0a0;
@@ -24,53 +22,42 @@
         }
         html{scroll-behavior:smooth}
         body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden}
-        #plasma-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-        .overlay{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,rgba(4,6,10,0) 0%,rgba(4,6,10,0.65) 100%)}
-
-        /* NAV */
+        #geo-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+        .overlay{position:fixed;inset:0;z-index:1;pointer-events:none;
+            background:radial-gradient(ellipse at 50% 40%,rgba(4,6,10,0.3) 0%,rgba(4,6,10,0.75) 100%)}
         nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 60px;display:flex;justify-content:space-between;align-items:center;background:rgba(4,6,10,0.75);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);animation:fadeDown 0.8s ease both}
         @keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
         .nav-logo{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px}
         .nav-logo span{background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .nav-links{display:flex;gap:36px;list-style:none}
-        .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.3s;letter-spacing:0.3px}
+        .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.3s}
         .nav-links a:hover{color:var(--gold2)}
-        .nav-cta{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:10px 26px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.3s ease;letter-spacing:1px;text-transform:uppercase}
+        .nav-cta{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:10px 26px;border-radius:4px;font-size:13px;font-weight:600;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.3s ease;letter-spacing:1px;text-transform:uppercase}
         .nav-cta:hover{background:var(--gold);color:var(--black);box-shadow:0 0 28px var(--gold-glow)}
-
-        /* SECTIONS */
         section{position:relative;z-index:2}
-
-        /* HERO */
         .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 40px 80px}
         .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;background:var(--gold-dim);border:1px solid var(--border);border-radius:2px;padding:8px 20px;font-size:11px;font-weight:600;color:var(--gold2);letter-spacing:3px;text-transform:uppercase;margin-bottom:40px;animation:fadeUp 0.8s 0.2s ease both}
         .hero-eyebrow::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold2);animation:blink 2s infinite}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
         .hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(56px,9vw,110px);font-weight:700;line-height:0.95;letter-spacing:-2px;margin-bottom:28px;animation:fadeUp 0.8s 0.3s ease both}
         .hero-title .line2{display:block;background:linear-gradient(135deg,var(--gold) 0%,var(--gold3) 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .hero-sub{font-size:17px;color:var(--muted);max-width:500px;line-height:1.8;margin-bottom:52px;font-weight:400;animation:fadeUp 0.8s 0.4s ease both;letter-spacing:0.2px}
+        .hero-sub{font-size:17px;color:var(--muted);max-width:500px;line-height:1.8;margin-bottom:52px;font-weight:400;animation:fadeUp 0.8s 0.4s ease both}
         .hero-buttons{display:flex;gap:16px;margin-bottom:80px;animation:fadeUp 0.8s 0.5s ease both}
-        .btn-primary{background:linear-gradient(135deg,var(--gold),#a07830);color:var(--black);padding:16px 40px;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.3s ease;box-shadow:0 0 30px rgba(201,168,76,0.25);letter-spacing:1.5px;text-transform:uppercase}
+        .btn-primary{background:linear-gradient(135deg,var(--gold),#a07830);color:var(--black);padding:16px 40px;border-radius:4px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.3s ease;box-shadow:0 0 30px rgba(201,168,76,0.25);letter-spacing:1.5px;text-transform:uppercase}
         .btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 40px rgba(201,168,76,0.45)}
-        .btn-ghost{background:transparent;color:var(--white);padding:16px 40px;border-radius:6px;font-size:14px;font-weight:500;text-decoration:none;border:1px solid rgba(245,240,232,0.15);transition:all 0.3s ease;letter-spacing:1px;text-transform:uppercase}
+        .btn-ghost{background:transparent;color:var(--white);padding:16px 40px;border-radius:4px;font-size:14px;font-weight:500;text-decoration:none;border:1px solid rgba(245,240,232,0.15);transition:all 0.3s ease;letter-spacing:1px;text-transform:uppercase}
         .btn-ghost:hover{border-color:rgba(245,240,232,0.35);background:rgba(245,240,232,0.04);transform:translateY(-3px)}
-
-        /* STATS */
-        .stats-bar{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:rgba(4,6,10,0.8);backdrop-filter:blur(24px);animation:fadeUp 0.8s 0.6s ease both;position:relative}
+        .stats-bar{display:flex;border:1px solid var(--border);border-radius:2px;overflow:hidden;background:rgba(4,6,10,0.85);backdrop-filter:blur(24px);animation:fadeUp 0.8s 0.6s ease both;position:relative}
         .stats-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
         .stat-item{padding:28px 44px;text-align:center;border-right:1px solid var(--border2)}
         .stat-item:last-child{border-right:none}
         .stat-number{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;line-height:1;margin-bottom:6px}
         .stat-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:500}
-
-        /* MARQUEE */
         .marquee-wrap{overflow:hidden;border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:18px 0;background:rgba(201,168,76,0.02);position:relative;z-index:2}
         .marquee-track{display:flex;gap:48px;animation:marquee 30s linear infinite;width:max-content}
         @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
         .marquee-item{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:3px;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:20px}
         .marquee-sep{width:3px;height:3px;border-radius:50%;background:var(--gold);opacity:0.4}
-
-        /* FEATURES */
         .features-section{padding:130px 60px;max-width:1200px;margin:0 auto}
         .section-label{font-size:10px;font-weight:600;color:var(--gold);letter-spacing:4px;text-transform:uppercase;margin-bottom:20px}
         .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,58px);font-weight:700;letter-spacing:-1px;line-height:1.05;margin-bottom:70px}
@@ -83,48 +70,36 @@
         .feature-card.large{grid-column:span 2;display:flex;gap:32px;align-items:flex-start}
         .feature-icon-wrap{width:48px;height:48px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-bottom:20px;background:var(--gold-dim)}
         .feature-card.large .feature-icon-wrap{width:60px;height:60px;font-size:24px;margin-bottom:0}
-        .feature-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;letter-spacing:-0.2px;color:var(--white)}
+        .feature-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;color:var(--white)}
         .feature-desc{font-size:14px;color:var(--muted);line-height:1.75}
         .feature-num{position:absolute;top:24px;right:28px;font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:700;color:rgba(201,168,76,0.06);line-height:1}
-
-        /* WORKFLOW */
         .workflow-section{padding:0 60px 130px;max-width:1200px;margin:0 auto}
         .workflow-steps{display:grid;grid-template-columns:repeat(5,1fr);position:relative}
         .workflow-steps::before{content:'';position:absolute;top:24px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.25}
         .workflow-step{text-align:center;padding:0 12px}
         .step-num{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:12px;display:block}
-        .step-circle{width:48px;height:48px;border:1px solid var(--border);background:rgba(4,6,10,0.9);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:18px;transition:all 0.3s;position:relative}
+        .step-circle{width:48px;height:48px;border:1px solid var(--border);background:rgba(4,6,10,0.9);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:18px;transition:all 0.3s}
         .workflow-step:hover .step-circle{border-color:var(--gold);box-shadow:0 0 20px var(--gold-glow)}
-        .step-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:6px;letter-spacing:0.5px;color:var(--white)}
+        .step-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:6px;letter-spacing:0.5px}
         .step-desc{font-size:11px;color:var(--muted);line-height:1.5}
-
-        /* TYPES */
         .types-section{padding:0 60px 130px;max-width:1200px;margin:0 auto}
         .types-grid{display:flex;gap:10px;flex-wrap:wrap}
         .type-pill{display:flex;align-items:center;gap:10px;padding:12px 22px;background:var(--card-bg);border:1px solid var(--border2);font-size:13px;font-weight:500;transition:all 0.3s;cursor:default}
         .type-pill:hover{border-color:var(--gold);background:var(--gold-dim);color:var(--gold2)}
-
-        /* CTA */
         .cta-section{padding:80px 60px 130px;text-align:center;position:relative}
         .cta-box{max-width:700px;margin:0 auto;background:var(--card-bg);border:1px solid var(--border);padding:72px 56px;position:relative;overflow:hidden}
         .cta-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold3),var(--gold),transparent)}
-        .cta-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.3}
         .cta-title{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:700;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.0}
         .cta-sub{color:var(--muted);font-size:16px;line-height:1.7;margin-bottom:44px;max-width:480px;margin-left:auto;margin-right:auto}
         .cta-buttons{display:flex;gap:14px;justify-content:center}
-
-        /* FOOTER */
+        .gold-divider{width:60px;height:1px;background:linear-gradient(90deg,var(--gold),var(--gold3));margin:0 auto 24px;opacity:0.6}
         footer{border-top:1px solid var(--border2);padding:32px 60px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
         .footer-logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800}
         .footer-logo span{background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .footer-copy{font-size:12px;color:var(--muted);letter-spacing:0.5px}
         .footer-links{display:flex;gap:28px}
-        .footer-links a{font-size:12px;color:var(--muted);text-decoration:none;transition:color 0.3s;letter-spacing:0.5px}
+        .footer-links a{font-size:12px;color:var(--muted);text-decoration:none;transition:color 0.3s}
         .footer-links a:hover{color:var(--gold)}
-
-        /* DIVIDER */
-        .gold-divider{width:60px;height:1px;background:linear-gradient(90deg,var(--gold),var(--gold3));margin:0 auto 24px;opacity:0.6}
-
         @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
         .reveal{opacity:0;transform:translateY(24px);transition:all 0.8s ease}
         .reveal.visible{opacity:1;transform:translateY(0)}
@@ -132,7 +107,7 @@
     </style>
 </head>
 <body>
-<canvas id="plasma-canvas"></canvas>
+<canvas id="geo-canvas"></canvas>
 <div class="overlay"></div>
 
 <nav>
@@ -152,8 +127,8 @@
         <span class="line2">Faster AI.</span>
     </h1>
     <p class="hero-sub">
-        NexLabel delivers enterprise-grade annotation with 
-        multi-layer QA, real-time dashboards, and a team 
+        NexLabel delivers enterprise-grade annotation with
+        multi-layer QA, real-time dashboards, and a team
         built for accuracy at scale.
     </p>
     <div class="hero-buttons">
@@ -324,132 +299,288 @@
 </footer>
 
 <script>
-// ═══════════════════════════════════
-// GOLD PLASMA ENERGY BACKGROUND
-// ═══════════════════════════════════
-const canvas = document.getElementById('plasma-canvas');
+// ══════════════════════════════════════════
+// SACRED GEOMETRY BACKGROUND
+// Flower of Life, Metatron's Cube,
+// Sri Yantra triangles, rotating rings
+// ══════════════════════════════════════════
+const canvas = document.getElementById('geo-canvas');
 const ctx = canvas.getContext('2d');
 let W, H, t = 0;
-
-const orbs = [
-    { x:0.15, y:0.25, r:220, color:'180,130,40',  ox:0.09, oy:0.07 },
-    { x:0.85, y:0.60, r:260, color:'140,100,30',  ox:0.07, oy:0.10 },
-    { x:0.50, y:0.85, r:180, color:'200,160,60',  ox:0.11, oy:0.06 },
-    { x:0.05, y:0.70, r:160, color:'100,70,20',   ox:0.08, oy:0.09 },
-    { x:0.90, y:0.15, r:200, color:'220,170,50',  ox:0.10, oy:0.07 },
-    { x:0.50, y:0.30, r:140, color:'160,120,35',  ox:0.06, oy:0.08 },
-];
-
-const bolts = [];
-let boltTimer = 0;
 
 function resize(){
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
 }
 
-function createBolt(){
-    const sx = Math.random() * W;
-    const sy = Math.random() * H * 0.6;
-    const segs = [];
-    let x = sx, y = sy;
-    const len = 6 + Math.floor(Math.random() * 8);
-    for(let i = 0; i < len; i++){
-        const nx = x + (Math.random()-0.5)*70;
-        const ny = y + 25 + Math.random()*35;
-        segs.push({x1:x,y1:y,x2:nx,y2:ny});
-        x=nx; y=ny;
+// Gold color with opacity
+function gold(a){ return `rgba(201,168,76,${a})`; }
+function gold2(a){ return `rgba(245,224,160,${a})`; }
+
+// Draw regular polygon
+function polygon(cx,cy,r,sides,rotation){
+    ctx.beginPath();
+    for(let i=0;i<sides;i++){
+        const ang = rotation + (i/sides)*Math.PI*2;
+        const x = cx + Math.cos(ang)*r;
+        const y = cy + Math.sin(ang)*r;
+        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
     }
-    const warm = Math.random() > 0.4;
-    bolts.push({
-        segs,
-        life:1.0,
-        decay:0.05+Math.random()*0.07,
-        color: warm ? '201,168,76' : '245,224,160'
+    ctx.closePath();
+}
+
+// Draw star polygon (pentagram, hexagram etc)
+function starPolygon(cx,cy,r,points,rotation){
+    ctx.beginPath();
+    for(let i=0;i<points*2;i++){
+        const ang = rotation + (i/(points*2))*Math.PI*2;
+        const rad = i%2===0 ? r : r*0.4;
+        const x = cx + Math.cos(ang)*rad;
+        const y = cy + Math.sin(ang)*rad;
+        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+}
+
+// Draw Flower of Life circle cluster
+function flowerOfLife(cx,cy,r,alpha){
+    const positions = [
+        {x:0,y:0},
+        {x:r,y:0},{x:-r,y:0},
+        {x:r/2,y:r*0.866},{x:-r/2,y:r*0.866},
+        {x:r/2,y:-r*0.866},{x:-r/2,y:-r*0.866},
+    ];
+    positions.forEach(p=>{
+        ctx.beginPath();
+        ctx.arc(cx+p.x,cy+p.y,r,0,Math.PI*2);
+        ctx.strokeStyle=gold(alpha);
+        ctx.lineWidth=0.5;
+        ctx.stroke();
     });
 }
 
-function drawBolt(b){
-    b.segs.forEach((s,i)=>{
-        const a = b.life*(1-i/b.segs.length*0.5);
-        ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);
-        ctx.strokeStyle=`rgba(${b.color},${a*0.12})`;ctx.lineWidth=7;ctx.stroke();
-        ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);
-        ctx.strokeStyle=`rgba(${b.color},${a*0.85})`;ctx.lineWidth=1.2;ctx.stroke();
-        ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);
-        ctx.strokeStyle=`rgba(255,240,180,${a*0.45})`;ctx.lineWidth=0.4;ctx.stroke();
-    });
-}
-
-function draw(){
-    ctx.clearRect(0,0,W,H);
-    t += 0.007;
-    boltTimer += 0.016;
-
-    if(boltTimer > 0.8+Math.random()*1.4){
-        createBolt();
-        if(Math.random()>0.5) createBolt();
-        boltTimer=0;
+// Draw Metatron's Cube lines
+function metatronCube(cx,cy,r,alpha){
+    const pts = [];
+    for(let i=0;i<6;i++){
+        const ang = (i/6)*Math.PI*2 - Math.PI/6;
+        pts.push({x:cx+Math.cos(ang)*r, y:cy+Math.sin(ang)*r});
     }
+    pts.push({x:cx,y:cy}); // center
 
-    // Draw orbs
-    orbs.forEach((o,idx)=>{
-        const px=(o.x+Math.sin(t*0.4+idx)*o.ox)*W;
-        const py=(o.y+Math.cos(t*0.3+idx)*o.oy)*H;
-
-        const g2=ctx.createRadialGradient(px,py,0,px,py,o.r*1.9);
-        g2.addColorStop(0,`rgba(${o.color},0)`);
-        g2.addColorStop(0.5,`rgba(${o.color},0.03)`);
-        g2.addColorStop(0.8,`rgba(${o.color},0.06)`);
-        g2.addColorStop(1,`rgba(${o.color},0)`);
-        ctx.beginPath();ctx.arc(px,py,o.r*1.9,0,Math.PI*2);
-        ctx.fillStyle=g2;ctx.fill();
-
-        const g=ctx.createRadialGradient(px,py,0,px,py,o.r);
-        g.addColorStop(0,`rgba(${o.color},0.20)`);
-        g.addColorStop(0.4,`rgba(${o.color},0.12)`);
-        g.addColorStop(0.75,`rgba(${o.color},0.04)`);
-        g.addColorStop(1,`rgba(${o.color},0)`);
-        ctx.beginPath();ctx.arc(px,py,o.r,0,Math.PI*2);
-        ctx.fillStyle=g;ctx.fill();
-    });
-
-    // Connections
-    for(let i=0;i<orbs.length;i++){
-        for(let j=i+1;j<orbs.length;j++){
-            const ax=(orbs[i].x+Math.sin(t*0.4+i)*orbs[i].ox)*W;
-            const ay=(orbs[i].y+Math.cos(t*0.3+i)*orbs[i].oy)*H;
-            const bx=(orbs[j].x+Math.sin(t*0.4+j)*orbs[j].ox)*W;
-            const by=(orbs[j].y+Math.cos(t*0.3+j)*orbs[j].oy)*H;
-            const d=Math.sqrt((ax-bx)**2+(ay-by)**2);
-            if(d<380){
-                const a=(1-d/380)*0.07;
-                const mx=(ax+bx)/2+Math.sin(t)*18;
-                const my=(ay+by)/2+Math.cos(t)*18;
-                ctx.beginPath();ctx.moveTo(ax,ay);
-                ctx.quadraticCurveTo(mx,my,bx,by);
-                ctx.strokeStyle=`rgba(201,168,76,${a})`;
-                ctx.lineWidth=0.8;ctx.stroke();
-            }
+    // Connect all points
+    for(let i=0;i<pts.length;i++){
+        for(let j=i+1;j<pts.length;j++){
+            ctx.beginPath();
+            ctx.moveTo(pts[i].x,pts[i].y);
+            ctx.lineTo(pts[j].x,pts[j].y);
+            ctx.strokeStyle=gold(alpha*0.6);
+            ctx.lineWidth=0.4;
+            ctx.stroke();
         }
     }
 
-    // Bolts
-    for(let i=bolts.length-1;i>=0;i--){
-        drawBolt(bolts[i]);
-        bolts[i].life-=bolts[i].decay;
-        if(bolts[i].life<=0) bolts.splice(i,1);
-    }
+    // Outer hexagon
+    polygon(cx,cy,r,6,-Math.PI/6);
+    ctx.strokeStyle=gold(alpha);
+    ctx.lineWidth=0.6;
+    ctx.stroke();
+
+    // Inner hexagon rotated
+    polygon(cx,cy,r*0.577,6,Math.PI/6);
+    ctx.strokeStyle=gold(alpha*0.8);
+    ctx.lineWidth=0.5;
+    ctx.stroke();
+}
+
+// Shapes config
+function buildShapes(){
+    return [
+        // Large central flower of life — center
+        { type:'flower', x:0.5, y:0.5, r:90, speed:0.00012, rot:0, alpha:0.10, drift:0.02 },
+
+        // Metatron's cubes
+        { type:'metatron', x:0.15, y:0.2,  r:110, speed:0.0002,  rot:0, alpha:0.12, drift:0.03 },
+        { type:'metatron', x:0.85, y:0.75, r:130, speed:0.00015, rot:1, alpha:0.10, drift:0.025 },
+        { type:'metatron', x:0.5,  y:0.15, r:80,  speed:0.00025, rot:2, alpha:0.08, drift:0.04 },
+
+        // Rotating hexagons
+        { type:'hex', x:0.08, y:0.6,  r:70,  speed:0.0003,  rot:0, alpha:0.10, drift:0.035 },
+        { type:'hex', x:0.92, y:0.3,  r:85,  speed:0.00025, rot:1, alpha:0.09, drift:0.03 },
+        { type:'hex', x:0.3,  y:0.88, r:65,  speed:0.0004,  rot:2, alpha:0.08, drift:0.04 },
+        { type:'hex', x:0.75, y:0.1,  r:55,  speed:0.00035, rot:3, alpha:0.07, drift:0.03 },
+
+        // Triangles (Sri Yantra inspired)
+        { type:'tri', x:0.2,  y:0.5,  r:80,  speed:0.0002,  rot:0,           alpha:0.09, drift:0.03 },
+        { type:'tri', x:0.8,  y:0.5,  r:90,  speed:0.00025, rot:Math.PI,     alpha:0.08, drift:0.025 },
+        { type:'tri', x:0.5,  y:0.7,  r:70,  speed:0.0003,  rot:Math.PI/6,  alpha:0.07, drift:0.035 },
+
+        // Stars
+        { type:'star6', x:0.35, y:0.15, r:50, speed:0.0004, rot:0, alpha:0.10, drift:0.04 },
+        { type:'star6', x:0.65, y:0.85, r:60, speed:0.0003, rot:1, alpha:0.09, drift:0.03 },
+        { type:'star8', x:0.1,  y:0.35, r:45, speed:0.0005, rot:0, alpha:0.08, drift:0.04 },
+        { type:'star8', x:0.9,  y:0.55, r:50, speed:0.0004, rot:2, alpha:0.08, drift:0.035 },
+
+        // Concentric circles
+        { type:'rings', x:0.5,  y:0.5,  r:200, speed:0.00008, rot:0, alpha:0.06, drift:0.01 },
+        { type:'rings', x:0.2,  y:0.8,  r:120, speed:0.00015, rot:0, alpha:0.07, drift:0.02 },
+        { type:'rings', x:0.8,  y:0.2,  r:100, speed:0.0002,  rot:0, alpha:0.07, drift:0.025 },
+
+        // Pentagrams
+        { type:'star5', x:0.25, y:0.35, r:55, speed:0.0003, rot:0, alpha:0.08, drift:0.035 },
+        { type:'star5', x:0.75, y:0.65, r:65, speed:0.00025,rot:1, alpha:0.08, drift:0.03 },
+    ];
+}
+
+let shapes = [];
+
+function draw(){
+    ctx.clearRect(0,0,W,H);
+    t += 1;
+
+    shapes.forEach((s,idx)=>{
+        const rot = s.rot + t * s.speed * 1000;
+        const dx  = Math.sin(t * s.speed * 800 + idx) * s.drift;
+        const dy  = Math.cos(t * s.speed * 700 + idx) * s.drift;
+        const cx  = (s.x + dx) * W;
+        const cy  = (s.y + dy) * H;
+
+        ctx.save();
+        ctx.translate(cx,cy);
+        ctx.rotate(rot);
+
+        switch(s.type){
+            case 'flower':
+                flowerOfLife(0,0,s.r,s.alpha);
+                break;
+
+            case 'metatron':
+                metatronCube(0,0,s.r,s.alpha);
+                break;
+
+            case 'hex':
+                // Double hexagon (inner+outer)
+                polygon(0,0,s.r,6,0);
+                ctx.strokeStyle=gold(s.alpha);
+                ctx.lineWidth=0.6;
+                ctx.stroke();
+
+                polygon(0,0,s.r,6,Math.PI/6);
+                ctx.strokeStyle=gold(s.alpha*0.6);
+                ctx.lineWidth=0.4;
+                ctx.stroke();
+
+                polygon(0,0,s.r*0.6,6,0);
+                ctx.strokeStyle=gold(s.alpha*0.5);
+                ctx.lineWidth=0.4;
+                ctx.stroke();
+
+                // Center dot
+                ctx.beginPath();
+                ctx.arc(0,0,2,0,Math.PI*2);
+                ctx.fillStyle=gold(s.alpha*0.8);
+                ctx.fill();
+                break;
+
+            case 'tri':
+                // Two overlapping triangles = Star of David
+                polygon(0,0,s.r,3,0);
+                ctx.strokeStyle=gold(s.alpha);
+                ctx.lineWidth=0.6;
+                ctx.stroke();
+
+                polygon(0,0,s.r,3,Math.PI);
+                ctx.strokeStyle=gold(s.alpha*0.7);
+                ctx.lineWidth=0.5;
+                ctx.stroke();
+
+                // Inner circle
+                ctx.beginPath();
+                ctx.arc(0,0,s.r*0.35,0,Math.PI*2);
+                ctx.strokeStyle=gold(s.alpha*0.5);
+                ctx.lineWidth=0.4;
+                ctx.stroke();
+                break;
+
+            case 'star5':
+                starPolygon(0,0,s.r,5,0);
+                ctx.strokeStyle=gold(s.alpha);
+                ctx.lineWidth=0.5;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(0,0,s.r,0,Math.PI*2);
+                ctx.strokeStyle=gold(s.alpha*0.3);
+                ctx.lineWidth=0.3;
+                ctx.stroke();
+                break;
+
+            case 'star6':
+                starPolygon(0,0,s.r,6,0);
+                ctx.strokeStyle=gold(s.alpha);
+                ctx.lineWidth=0.5;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(0,0,s.r,0,Math.PI*2);
+                ctx.strokeStyle=gold(s.alpha*0.3);
+                ctx.lineWidth=0.3;
+                ctx.stroke();
+                break;
+
+            case 'star8':
+                starPolygon(0,0,s.r,8,0);
+                ctx.strokeStyle=gold(s.alpha);
+                ctx.lineWidth=0.5;
+                ctx.stroke();
+
+                polygon(0,0,s.r*0.7,8,Math.PI/8);
+                ctx.strokeStyle=gold(s.alpha*0.4);
+                ctx.lineWidth=0.3;
+                ctx.stroke();
+                break;
+
+            case 'rings':
+                // 5 concentric rings slowly pulsing
+                for(let ri=1;ri<=5;ri++){
+                    const pulse = 1 + Math.sin(t*0.02 + ri)*0.03;
+                    ctx.beginPath();
+                    ctx.arc(0,0,s.r*(ri/5)*pulse,0,Math.PI*2);
+                    ctx.strokeStyle=gold(s.alpha*(1-ri*0.12));
+                    ctx.lineWidth=0.4;
+                    ctx.stroke();
+                }
+                // Cross lines through rings
+                for(let li=0;li<6;li++){
+                    const ang = (li/6)*Math.PI*2;
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(ang)*s.r*0.2, Math.sin(ang)*s.r*0.2);
+                    ctx.lineTo(Math.cos(ang)*s.r, Math.sin(ang)*s.r);
+                    ctx.strokeStyle=gold(s.alpha*0.4);
+                    ctx.lineWidth=0.3;
+                    ctx.stroke();
+                }
+                break;
+        }
+
+        ctx.restore();
+    });
 
     requestAnimationFrame(draw);
 }
 
-resize(); draw();
-window.addEventListener('resize',resize);
+function init(){
+    resize();
+    shapes = buildShapes();
+    draw();
+}
+
+init();
+window.addEventListener('resize',()=>{ resize(); shapes=buildShapes(); });
 
 // COUNTERS
 function animateCounter(el,target){
-    let c=0;const step=target/60;
+    let c=0; const step=target/60;
     const tmr=setInterval(()=>{
         c+=step;
         if(c>=target){c=target;clearInterval(tmr);}

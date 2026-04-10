@@ -3,112 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexLabel - Login</title>
+    <title>NexLabel — Login</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .login-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0a0f1e 0%, #111827 100%);
+        .login-wrapper{
+            display:flex;justify-content:center;
+            align-items:center;min-height:100vh;
+            position:relative;z-index:2;
+            padding:40px 20px;
         }
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-            padding: 40px;
-            background: rgba(26, 34, 53, 0.9);
-            border: 1px solid rgba(0, 212, 255, 0.15);
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
+        .login-card{
+            width:100%;max-width:420px;
+            padding:48px;
+            background:rgba(4,6,10,0.92);
+            border:1px solid rgba(201,168,76,0.15);
+            position:relative;
+            backdrop-filter:blur(24px);
         }
-        .login-logo {
-            text-align: center;
-            margin-bottom: 8px;
-            font-size: 36px;
-            font-weight: 800;
+        .login-card::before{
+            content:'';position:absolute;
+            top:0;left:0;right:0;height:1px;
+            background:linear-gradient(90deg,transparent,var(--gold),transparent);
         }
-        .login-logo span {
-            color: #00d4ff;
+        .login-logo{
+            text-align:center;margin-bottom:6px;
+            font-family:'Syne',sans-serif;
+            font-size:32px;font-weight:800;
+            letter-spacing:-0.5px;
         }
-        .login-tagline {
-            text-align: center;
-            color: #8892a4;
-            font-size: 13px;
-            margin-bottom: 32px;
+        .login-logo span{
+            background:linear-gradient(135deg,var(--gold),var(--gold3));
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
         }
-        .login-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 24px;
+        .login-tagline{
+            text-align:center;color:var(--muted);
+            font-size:11px;margin-bottom:40px;
+            letter-spacing:2px;text-transform:uppercase;
+            font-weight:500;
         }
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: #00d4ff;
-            color: #0a0f1e;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+        .login-title{
+            font-family:'Cormorant Garamond',serif;
+            font-size:26px;font-weight:700;
+            margin-bottom:28px;letter-spacing:-0.3px;
         }
-        .login-btn:hover {
-            background: #0099cc;
-            transform: translateY(-1px);
+        .login-btn{
+            width:100%;padding:14px;
+            background:linear-gradient(135deg,var(--gold),#a07830);
+            color:var(--black);border:none;
+            font-family:'Syne',sans-serif;
+            font-size:13px;font-weight:700;
+            cursor:pointer;transition:all 0.3s ease;
+            letter-spacing:2px;text-transform:uppercase;
         }
-        .forgot-link {
-            display: block;
-            text-align: center;
-            margin-top: 16px;
-            color: #00d4ff;
-            text-decoration: none;
-            font-size: 14px;
+        .login-btn:hover{
+            transform:translateY(-2px);
+            box-shadow:0 8px 30px rgba(201,168,76,0.35);
         }
-        .forgot-link:hover {
-            text-decoration: underline;
+        .login-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+        .forgot-link{
+            display:block;text-align:center;
+            margin-top:18px;color:var(--muted);
+            text-decoration:none;font-size:12px;
+            letter-spacing:0.5px;transition:color 0.3s;
         }
-        .contact-admin {
-            text-align: center;
-            margin-top: 32px;
-            color: #8892a4;
-            font-size: 13px;
+        .forgot-link:hover{color:var(--gold2);}
+        .contact-admin{
+            text-align:center;margin-top:32px;
+            color:var(--muted);font-size:12px;
+            padding-top:20px;
+            border-top:1px solid var(--gold-border2);
+            letter-spacing:0.3px;
         }
-        .input-icon {
-            position: relative;
+        .contact-admin strong{color:var(--gold2);}
+        .input-icon{position:relative;}
+        .input-icon input{padding-left:40px;}
+        .input-icon .icon{
+            position:absolute;left:14px;
+            top:50%;transform:translateY(-50%);
+            color:var(--muted);font-size:14px;
         }
-        .input-icon input {
-            padding-left: 40px;
+        .error-msg{
+            background:rgba(201,76,76,0.08);
+            border:1px solid rgba(201,76,76,0.25);
+            border-left:2px solid var(--danger);
+            color:#e87070;padding:10px 14px;
+            font-size:12px;margin-bottom:16px;
+            display:none;letter-spacing:0.3px;
         }
-        .input-icon .icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8892a4;
+        .gold-corner{
+            position:absolute;width:12px;height:12px;
         }
-        .error-msg {
-            background: rgba(255,77,77,0.1);
-            border: 1px solid #ff4d4d;
-            color: #ff4d4d;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 16px;
-            display: none;
-        }
+        .gold-corner.tl{top:-1px;left:-1px;
+            border-top:1px solid var(--gold);
+            border-left:1px solid var(--gold);}
+        .gold-corner.tr{top:-1px;right:-1px;
+            border-top:1px solid var(--gold);
+            border-right:1px solid var(--gold);}
+        .gold-corner.bl{bottom:-1px;left:-1px;
+            border-bottom:1px solid var(--gold);
+            border-left:1px solid var(--gold);}
+        .gold-corner.br{bottom:-1px;right:-1px;
+            border-bottom:1px solid var(--gold);
+            border-right:1px solid var(--gold);}
     </style>
 </head>
 <body>
+    <canvas id="geo-canvas"></canvas>
+    <div class="geo-overlay"></div>
+
     <div class="login-wrapper">
         <div class="login-card">
+            <!-- Corner accents -->
+            <div class="gold-corner tl"></div>
+            <div class="gold-corner tr"></div>
+            <div class="gold-corner bl"></div>
+            <div class="gold-corner br"></div>
+
             <div class="login-logo">Nex<span>Label</span></div>
-            <div class="login-tagline">Powering AI Through Precision Labeling</div>
+            <div class="login-tagline">
+                Powering AI Through Precision Labeling
+            </div>
 
             <div class="login-title">Welcome Back</div>
 
@@ -120,7 +136,8 @@
                 <label>Email Address</label>
                 <div class="input-icon">
                     <span class="icon">✉</span>
-                    <input type="email" id="email" placeholder="you@example.com">
+                    <input type="email" id="email"
+                        placeholder="you@nexxlabel.com">
                 </div>
             </div>
 
@@ -128,85 +145,83 @@
                 <label>Password</label>
                 <div class="input-icon">
                     <span class="icon">🔒</span>
-                    <input type="password" id="password" placeholder="••••••••">
+                    <input type="password" id="password"
+                        placeholder="••••••••">
                 </div>
             </div>
 
             <button class="login-btn" onclick="handleLogin()">
-                Sign In →
+                Sign In
             </button>
 
             <a href="#" class="forgot-link">Forgot password?</a>
 
             <div class="contact-admin">
-                Don't have an account? 
+                Don't have an account?
                 <strong>Contact your administrator</strong>
             </div>
         </div>
     </div>
 
-    <!-- Supabase CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
-<script src="js/auth.js"></script>
-<script>
-    // Check if already logged in
-    window.onload = async function() {
-    try {
-        const { data } = await supabaseClient
-            .auth.getSession();
-        if (data.session) {
-            const profile = 
-                await getCurrentProfile();
-            if (profile) {
-                redirectByRole(profile.role);
-                return;
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/geometry.js"></script>
+    <script>
+        window.onload = async function() {
+            try {
+                const { data } = await supabaseClient
+                    .auth.getSession();
+                if (data.session) {
+                    const profile =
+                        await getCurrentProfile();
+                    if (profile) {
+                        redirectByRole(profile.role);
+                        return;
+                    }
+                }
+            } catch(e) {
+                console.error('Session check:', e);
             }
         }
-    } catch(error) {
-        console.error('Error:', error);
-    }
-}
 
-    // Handle Login
-    async function handleLogin() {
-        const email = document
-            .getElementById('email').value;
-        const password = document
-            .getElementById('password').value;
-        const errorMsg = document
-            .getElementById('errorMsg');
-        const btn = document.querySelector('.login-btn');
+        async function handleLogin() {
+            const email = document
+                .getElementById('email').value;
+            const password = document
+                .getElementById('password').value;
+            const errorMsg = document
+                .getElementById('errorMsg');
+            const btn = document
+                .querySelector('.login-btn');
 
-        if (!email || !password) {
-            errorMsg.style.display = 'block';
-            errorMsg.textContent = 
-                'Please enter email and password';
-            return;
+            if (!email || !password) {
+                errorMsg.style.display = 'block';
+                errorMsg.textContent =
+                    'Please enter your email and password.';
+                return;
+            }
+
+            btn.textContent = 'Signing in...';
+            btn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            try {
+                await signIn(email, password);
+                const profile = await getCurrentProfile();
+                redirectByRole(profile.role);
+            } catch(error) {
+                errorMsg.style.display = 'block';
+                errorMsg.textContent =
+                    'Invalid email or password.';
+                btn.textContent = 'Sign In';
+                btn.disabled = false;
+            }
         }
 
-        // Show loading
-        btn.textContent = 'Signing in...';
-        btn.disabled = true;
-        errorMsg.style.display = 'none';
-
-        try {
-            await signIn(email, password);
-            const profile = await getCurrentProfile();
-            redirectByRole(profile.role);
-        } catch(error) {
-            errorMsg.style.display = 'block';
-            errorMsg.textContent = 
-                'Invalid email or password';
-            btn.textContent = 'Sign In →';
-            btn.disabled = false;
-        }
-    }
-
-    // Enter key support
-    document.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') handleLogin();
-    });
-</script>
+        document.addEventListener('keypress', e => {
+            if (e.key === 'Enter') handleLogin();
+        });
+    </script>
 </body>
 </html>

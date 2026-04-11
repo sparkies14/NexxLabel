@@ -6,222 +6,341 @@
     <title>NexLabel — Login</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .login-wrapper{
-            display:flex;justify-content:center;
-            align-items:center;min-height:100vh;
-            position:relative;z-index:2;
-            padding:40px 20px;
+        body { background: var(--off); }
+        .login-wrapper {
+            display: flex;
+            min-height: 100vh;
         }
-        .login-card{
-            width:100%;max-width:420px;
-            padding:48px;
-            background:rgba(4,6,10,0.92);
-            border:1px solid rgba(201,168,76,0.15);
-            position:relative;
-            backdrop-filter:blur(24px);
+        /* Left panel */
+        .login-left {
+            flex: 1;
+            background: var(--black);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
         }
-        .login-card::before{
-            content:'';position:absolute;
-            top:0;left:0;right:0;height:1px;
-            background:linear-gradient(90deg,transparent,var(--gold),transparent);
+        .login-left::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 80px,
+                rgba(255,255,255,0.015) 80px,
+                rgba(255,255,255,0.015) 81px
+            ),
+            repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 80px,
+                rgba(255,255,255,0.015) 80px,
+                rgba(255,255,255,0.015) 81px
+            );
         }
-        .login-logo{
-            text-align:center;margin-bottom:6px;
-            font-family:'Syne',sans-serif;
-            font-size:32px;font-weight:800;
-            letter-spacing:-0.5px;
+        .left-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
         }
-        .login-logo span{
-            background:linear-gradient(135deg,var(--gold),var(--gold3));
-            -webkit-background-clip:text;
-            -webkit-text-fill-color:transparent;
-            background-clip:text;
+        .left-logo span { color: rgba(255,255,255,0.4); }
+        .left-content {
+            position: relative;
+            z-index: 1;
         }
-        .login-tagline{
-            text-align:center;color:var(--muted);
-            font-size:11px;margin-bottom:40px;
-            letter-spacing:2px;text-transform:uppercase;
-            font-weight:500;
+        .left-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 20px;
         }
-        .login-title{
-            font-family:'Cormorant Garamond',serif;
-            font-size:26px;font-weight:700;
-            margin-bottom:28px;letter-spacing:-0.3px;
+        .left-sub {
+            font-size: 15px;
+            color: rgba(255,255,255,0.45);
+            line-height: 1.7;
+            max-width: 320px;
         }
-        .login-btn{
-            width:100%;padding:14px;
-            background:linear-gradient(135deg,var(--gold),#a07830);
-            color:var(--black);border:none;
-            font-family:'Syne',sans-serif;
-            font-size:13px;font-weight:700;
-            cursor:pointer;transition:all 0.3s ease;
-            letter-spacing:2px;text-transform:uppercase;
+        .left-features {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
-        .login-btn:hover{
-            transform:translateY(-2px);
-            box-shadow:0 8px 30px rgba(201,168,76,0.35);
+        .left-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
         }
-        .login-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
-        .forgot-link{
-            display:block;text-align:center;
-            margin-top:18px;color:var(--muted);
-            text-decoration:none;font-size:12px;
-            letter-spacing:0.5px;transition:color 0.3s;
+        .left-feature-dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            flex-shrink: 0;
         }
-        .forgot-link:hover{color:var(--gold2);}
-        .contact-admin{
-            text-align:center;margin-top:32px;
-            color:var(--muted);font-size:12px;
-            padding-top:20px;
-            border-top:1px solid var(--gold-border2);
-            letter-spacing:0.3px;
+        /* Right panel */
+        .login-right {
+            width: 480px;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 64px 56px;
+            border-left: 1px solid var(--border);
         }
-        .contact-admin strong{color:var(--gold2);}
-        .input-icon{position:relative;}
-        .input-icon input{padding-left:40px;}
-        .input-icon .icon{
-            position:absolute;left:14px;
-            top:50%;transform:translateY(-50%);
-            color:var(--muted);font-size:14px;
+        .login-header {
+            margin-bottom: 40px;
         }
-        .error-msg{
-            background:rgba(201,76,76,0.08);
-            border:1px solid rgba(201,76,76,0.25);
-            border-left:2px solid var(--danger);
-            color:#e87070;padding:10px 14px;
-            font-size:12px;margin-bottom:16px;
-            display:none;letter-spacing:0.3px;
+        .login-brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 28px;
+            letter-spacing: -0.3px;
         }
-        .gold-corner{
-            position:absolute;width:12px;height:12px;
+        .login-brand span { color: var(--mid); }
+        .login-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--black);
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
         }
-        .gold-corner.tl{top:-1px;left:-1px;
-            border-top:1px solid var(--gold);
-            border-left:1px solid var(--gold);}
-        .gold-corner.tr{top:-1px;right:-1px;
-            border-top:1px solid var(--gold);
-            border-right:1px solid var(--gold);}
-        .gold-corner.bl{bottom:-1px;left:-1px;
-            border-bottom:1px solid var(--gold);
-            border-left:1px solid var(--gold);}
-        .gold-corner.br{bottom:-1px;right:-1px;
-            border-bottom:1px solid var(--gold);
-            border-right:1px solid var(--gold);}
+        .login-subtitle {
+            font-size: 14px;
+            color: var(--mid);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 4px;
+        }
+        .login-btn:hover {
+            background: var(--dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        .login-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .forgot-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: var(--mid);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+        .forgot-link:hover { color: var(--black); }
+        .contact-admin {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--mid);
+            font-size: 12px;
+        }
+        .contact-admin strong {
+            color: var(--black);
+            font-weight: 600;
+        }
+        .error-msg {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-left: 3px solid var(--danger);
+            color: var(--danger);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .input-icon { position: relative; }
+        .input-icon input { padding-left: 38px; }
+        .input-icon .icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--light);
+            font-size: 14px;
+        }
+        @media(max-width:768px){
+            .login-left{display:none;}
+            .login-right{width:100%;}
+        }
     </style>
 </head>
 <body>
-    <canvas id="geo-canvas"></canvas>
-    <div class="geo-overlay"></div>
+<div class="login-wrapper">
 
-    <div class="login-wrapper">
-        <div class="login-card">
-            <!-- Corner accents -->
-            <div class="gold-corner tl"></div>
-            <div class="gold-corner tr"></div>
-            <div class="gold-corner bl"></div>
-            <div class="gold-corner br"></div>
-
-            <div class="login-logo">Nex<span>Label</span></div>
-            <div class="login-tagline">
-                Powering AI Through Precision Labeling
+    <!-- LEFT PANEL -->
+    <div class="login-left">
+        <div class="left-logo">Nex<span>Label</span></div>
+        <div class="left-content">
+            <div class="left-title">
+                AI Annotation<br>Done Right.
             </div>
-
-            <div class="login-title">Welcome Back</div>
-
-            <div class="error-msg" id="errorMsg">
-                Invalid email or password. Please try again.
+            <div class="left-sub">
+                Enterprise-grade data labeling with 
+                multi-layer QA, real-time tracking, 
+                and a team that delivers.
             </div>
-
-            <div class="input-group">
-                <label>Email Address</label>
-                <div class="input-icon">
-                    <span class="icon">✉</span>
-                    <input type="email" id="email"
-                        placeholder="you@nexxlabel.com">
-                </div>
+        </div>
+        <div class="left-features">
+            <div class="left-feature">
+                <div class="left-feature-dot"></div>
+                Multi-layer QA workflow
             </div>
-
-            <div class="input-group">
-                <label>Password</label>
-                <div class="input-icon">
-                    <span class="icon">🔒</span>
-                    <input type="password" id="password"
-                        placeholder="••••••••">
-                </div>
+            <div class="left-feature">
+                <div class="left-feature-dot"></div>
+                Real-time client dashboard
             </div>
-
-            <button class="login-btn" onclick="handleLogin()">
-                Sign In
-            </button>
-
-            <a href="#" class="forgot-link">Forgot password?</a>
-
-            <div class="contact-admin">
-                Don't have an account?
-                <strong>Contact your administrator</strong>
+            <div class="left-feature">
+                <div class="left-feature-dot"></div>
+                Role-based access control
+            </div>
+            <div class="left-feature">
+                <div class="left-feature-dot"></div>
+                Image, video, text & 3D annotation
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/geometry.js"></script>
-    <script>
-        window.onload = async function() {
-            try {
-                const { data } = await supabaseClient
-                    .auth.getSession();
-                if (data.session) {
-                    const profile =
-                        await getCurrentProfile();
-                    if (profile) {
-                        redirectByRole(profile.role);
-                        return;
-                    }
+    <!-- RIGHT PANEL -->
+    <div class="login-right">
+        <div class="login-header">
+            <div class="login-brand">
+                Nex<span>Label</span>
+            </div>
+            <div class="login-title">Sign in</div>
+            <div class="login-subtitle">
+                Enter your credentials to continue
+            </div>
+        </div>
+
+        <div class="error-msg" id="errorMsg">
+            Invalid email or password.
+        </div>
+
+        <div class="input-group">
+            <label>Email address</label>
+            <div class="input-icon">
+                <span class="icon">✉</span>
+                <input type="email" id="email"
+                    placeholder="you@nexxlabel.com">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <div class="input-icon">
+                <span class="icon">🔒</span>
+                <input type="password" id="password"
+                    placeholder="••••••••">
+            </div>
+        </div>
+
+        <button class="login-btn"
+            onclick="handleLogin()">
+            Sign in →
+        </button>
+
+        <a href="#" class="forgot-link">
+            Forgot your password?
+        </a>
+
+        <div class="contact-admin">
+            No account?
+            <strong>Contact your administrator</strong>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+<script>
+    window.onload = async function() {
+        try {
+            const { data } = await supabaseClient
+                .auth.getSession();
+            if (data.session) {
+                const profile =
+                    await getCurrentProfile();
+                if (profile) {
+                    redirectByRole(profile.role);
+                    return;
                 }
-            } catch(e) {
-                console.error('Session check:', e);
             }
+        } catch(e) {
+            console.error('Session check:', e);
+        }
+    }
+
+    async function handleLogin() {
+        const email = document
+            .getElementById('email').value;
+        const password = document
+            .getElementById('password').value;
+        const errorMsg = document
+            .getElementById('errorMsg');
+        const btn = document
+            .querySelector('.login-btn');
+
+        if (!email || !password) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent =
+                'Please enter your email and password.';
+            return;
         }
 
-        async function handleLogin() {
-            const email = document
-                .getElementById('email').value;
-            const password = document
-                .getElementById('password').value;
-            const errorMsg = document
-                .getElementById('errorMsg');
-            const btn = document
-                .querySelector('.login-btn');
+        btn.textContent = 'Signing in...';
+        btn.disabled = true;
+        errorMsg.style.display = 'none';
 
-            if (!email || !password) {
-                errorMsg.style.display = 'block';
-                errorMsg.textContent =
-                    'Please enter your email and password.';
-                return;
-            }
-
-            btn.textContent = 'Signing in...';
-            btn.disabled = true;
-            errorMsg.style.display = 'none';
-
-            try {
-                await signIn(email, password);
-                const profile = await getCurrentProfile();
-                redirectByRole(profile.role);
-            } catch(error) {
-                errorMsg.style.display = 'block';
-                errorMsg.textContent =
-                    'Invalid email or password.';
-                btn.textContent = 'Sign In';
-                btn.disabled = false;
-            }
+        try {
+            await signIn(email, password);
+            const profile = await getCurrentProfile();
+            redirectByRole(profile.role);
+        } catch(error) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent =
+                'Invalid email or password.';
+            btn.textContent = 'Sign in →';
+            btn.disabled = false;
         }
+    }
 
-        document.addEventListener('keypress', e => {
-            if (e.key === 'Enter') handleLogin();
-        });
-    </script>
+    document.addEventListener('keypress', e => {
+        if (e.key === 'Enter') handleLogin();
+    });
+</script>
 </body>
 </html>

@@ -4,112 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NexLabel — Powering AI Through Precision Labeling</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
         :root{
-            --black:#04060a;
-            --gold:#c9a84c;
-            --gold2:#e8c96d;
-            --gold3:#f5e0a0;
-            --gold-dim:rgba(201,168,76,0.10);
-            --gold-glow:rgba(201,168,76,0.30);
-            --white:#f5f0e8;
-            --muted:#6b6456;
-            --card-bg:rgba(8,10,14,0.88);
-            --border:rgba(201,168,76,0.15);
-            --border2:rgba(201,168,76,0.08);
+            --black:#0a0a0a;--dark:#1a1a1a;
+            --mid:#6b7280;--light:#d1d5db;
+            --lighter:#e5e7eb;--lightest:#f3f4f6;
+            --off:#f7f7f7;--white:#ffffff;
+            --border:rgba(0,0,0,0.08);
         }
         html{scroll-behavior:smooth}
-        body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden}
-        #geo-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-        .overlay{position:fixed;inset:0;z-index:1;pointer-events:none;
-            background:radial-gradient(ellipse at 50% 40%,rgba(4,6,10,0.3) 0%,rgba(4,6,10,0.75) 100%)}
-        nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 60px;display:flex;justify-content:space-between;align-items:center;background:rgba(4,6,10,0.75);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);animation:fadeDown 0.8s ease both}
-        @keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-        .nav-logo{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px}
-        .nav-logo span{background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .nav-links{display:flex;gap:36px;list-style:none}
-        .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.3s}
-        .nav-links a:hover{color:var(--gold2)}
-        .nav-cta{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:10px 26px;border-radius:4px;font-size:13px;font-weight:600;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.3s ease;letter-spacing:1px;text-transform:uppercase}
-        .nav-cta:hover{background:var(--gold);color:var(--black);box-shadow:0 0 28px var(--gold-glow)}
-        section{position:relative;z-index:2}
-        .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 40px 80px}
-        .hero-eyebrow{display:inline-flex;align-items:center;gap:10px;background:var(--gold-dim);border:1px solid var(--border);border-radius:2px;padding:8px 20px;font-size:11px;font-weight:600;color:var(--gold2);letter-spacing:3px;text-transform:uppercase;margin-bottom:40px;animation:fadeUp 0.8s 0.2s ease both}
-        .hero-eyebrow::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold2);animation:blink 2s infinite}
+        body{background:var(--white);color:var(--black);font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+        /* NAV */
+        nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 60px;height:64px;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);animation:fadeDown 0.6s ease both}
+        @keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+        .nav-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px;color:var(--black)}
+        .nav-logo span{color:var(--mid)}
+        .nav-links{display:flex;gap:32px;list-style:none}
+        .nav-links a{color:var(--mid);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.2s}
+        .nav-links a:hover{color:var(--black)}
+        .nav-cta{background:var(--black);color:var(--white);padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;font-family:'Inter',sans-serif;transition:all 0.2s ease}
+        .nav-cta:hover{background:var(--dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+
+        /* HERO */
+        .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:100px 40px 80px;background:var(--white)}
+        .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--lightest);border:1px solid var(--border);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--mid);letter-spacing:0.5px;margin-bottom:32px;animation:fadeUp 0.6s 0.1s ease both}
+        .hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--black);animation:blink 2s infinite}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-        .hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(56px,9vw,110px);font-weight:700;line-height:0.95;letter-spacing:-2px;margin-bottom:28px;animation:fadeUp 0.8s 0.3s ease both}
-        .hero-title .line2{display:block;background:linear-gradient(135deg,var(--gold) 0%,var(--gold3) 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .hero-sub{font-size:17px;color:var(--muted);max-width:500px;line-height:1.8;margin-bottom:52px;font-weight:400;animation:fadeUp 0.8s 0.4s ease both}
-        .hero-buttons{display:flex;gap:16px;margin-bottom:80px;animation:fadeUp 0.8s 0.5s ease both}
-        .btn-primary{background:linear-gradient(135deg,var(--gold),#a07830);color:var(--black);padding:16px 40px;border-radius:4px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Syne',sans-serif;transition:all 0.3s ease;box-shadow:0 0 30px rgba(201,168,76,0.25);letter-spacing:1.5px;text-transform:uppercase}
-        .btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 40px rgba(201,168,76,0.45)}
-        .btn-ghost{background:transparent;color:var(--white);padding:16px 40px;border-radius:4px;font-size:14px;font-weight:500;text-decoration:none;border:1px solid rgba(245,240,232,0.15);transition:all 0.3s ease;letter-spacing:1px;text-transform:uppercase}
-        .btn-ghost:hover{border-color:rgba(245,240,232,0.35);background:rgba(245,240,232,0.04);transform:translateY(-3px)}
-        .stats-bar{display:flex;border:1px solid var(--border);border-radius:2px;overflow:hidden;background:rgba(4,6,10,0.85);backdrop-filter:blur(24px);animation:fadeUp 0.8s 0.6s ease both;position:relative}
-        .stats-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-        .stat-item{padding:28px 44px;text-align:center;border-right:1px solid var(--border2)}
+        .hero-title{font-family:'Syne',sans-serif;font-size:clamp(48px,7vw,88px);font-weight:800;line-height:1.0;letter-spacing:-3px;margin-bottom:24px;animation:fadeUp 0.6s 0.15s ease both;color:var(--black)}
+        .hero-title .accent{color:var(--mid)}
+        .hero-sub{font-size:17px;color:var(--mid);max-width:480px;line-height:1.7;margin-bottom:44px;font-weight:400;animation:fadeUp 0.6s 0.2s ease both}
+        .hero-buttons{display:flex;gap:12px;margin-bottom:80px;animation:fadeUp 0.6s 0.25s ease both}
+        .btn-hero-primary{background:var(--black);color:var(--white);padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;font-family:'Inter',sans-serif;transition:all 0.2s ease}
+        .btn-hero-primary:hover{background:var(--dark);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.12)}
+        .btn-hero-ghost{background:transparent;color:var(--black);padding:14px 32px;border-radius:8px;font-size:14px;font-weight:500;text-decoration:none;border:1px solid var(--border);transition:all 0.2s ease}
+        .btn-hero-ghost:hover{border-color:var(--black);transform:translateY(-2px)}
+
+        /* STATS */
+        .stats-bar{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--white);animation:fadeUp 0.6s 0.3s ease both;box-shadow:0 2px 16px rgba(0,0,0,0.04)}
+        .stat-item{padding:24px 40px;text-align:center;border-right:1px solid var(--border)}
         .stat-item:last-child{border-right:none}
-        .stat-number{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;line-height:1;margin-bottom:6px}
-        .stat-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:500}
-        .marquee-wrap{overflow:hidden;border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:18px 0;background:rgba(201,168,76,0.02);position:relative;z-index:2}
+        .stat-number{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--black);display:block;line-height:1;margin-bottom:4px;letter-spacing:-1px}
+        .stat-label{font-size:12px;color:var(--mid);font-weight:500}
+
+        /* MARQUEE */
+        .marquee-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 0;background:var(--off)}
         .marquee-track{display:flex;gap:48px;animation:marquee 30s linear infinite;width:max-content}
         @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-        .marquee-item{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:3px;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:20px}
-        .marquee-sep{width:3px;height:3px;border-radius:50%;background:var(--gold);opacity:0.4}
-        .features-section{padding:130px 60px;max-width:1200px;margin:0 auto}
-        .section-label{font-size:10px;font-weight:600;color:var(--gold);letter-spacing:4px;text-transform:uppercase;margin-bottom:20px}
-        .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,58px);font-weight:700;letter-spacing:-1px;line-height:1.05;margin-bottom:70px}
-        .section-title span{background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border2);border:1px solid var(--border2)}
-        .feature-card{background:var(--card-bg);padding:36px;position:relative;overflow:hidden;transition:all 0.4s ease}
-        .feature-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.04),transparent);opacity:0;transition:opacity 0.4s}
-        .feature-card:hover{background:rgba(12,14,20,0.95)}
-        .feature-card:hover::after{opacity:1}
-        .feature-card.large{grid-column:span 2;display:flex;gap:32px;align-items:flex-start}
-        .feature-icon-wrap{width:48px;height:48px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-bottom:20px;background:var(--gold-dim)}
-        .feature-card.large .feature-icon-wrap{width:60px;height:60px;font-size:24px;margin-bottom:0}
-        .feature-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;color:var(--white)}
-        .feature-desc{font-size:14px;color:var(--muted);line-height:1.75}
-        .feature-num{position:absolute;top:24px;right:28px;font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:700;color:rgba(201,168,76,0.06);line-height:1}
-        .workflow-section{padding:0 60px 130px;max-width:1200px;margin:0 auto}
-        .workflow-steps{display:grid;grid-template-columns:repeat(5,1fr);position:relative}
-        .workflow-steps::before{content:'';position:absolute;top:24px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.25}
+        .marquee-item{font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--light);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:16px}
+        .marquee-sep{width:3px;height:3px;border-radius:50%;background:var(--lighter)}
+
+        /* FEATURES */
+        .features-section{padding:120px 60px;max-width:1200px;margin:0 auto}
+        .section-eyebrow{font-size:11px;font-weight:600;color:var(--mid);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+        .section-title{font-family:'Syne',sans-serif;font-size:clamp(28px,3.5vw,44px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:64px;color:var(--black)}
+        .section-title span{color:var(--mid)}
+        .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+        .feature-card{background:var(--white);padding:32px;transition:background 0.2s}
+        .feature-card:hover{background:var(--off)}
+        .feature-card.large{grid-column:span 2;display:flex;gap:28px;align-items:flex-start}
+        .feature-icon-wrap{width:44px;height:44px;border-radius:8px;background:var(--lightest);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-bottom:18px}
+        .feature-card.large .feature-icon-wrap{margin-bottom:0;flex-shrink:0}
+        .feature-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:10px;letter-spacing:-0.3px;color:var(--black)}
+        .feature-desc{font-size:14px;color:var(--mid);line-height:1.7}
+        .feature-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--lighter);letter-spacing:1px;margin-bottom:16px}
+
+        /* WORKFLOW */
+        .workflow-section{padding:0 60px 120px;max-width:1200px;margin:0 auto}
+        .workflow-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative}
+        .workflow-steps::before{content:'';position:absolute;top:22px;left:10%;right:10%;height:1px;background:var(--lighter)}
         .workflow-step{text-align:center;padding:0 12px}
-        .step-num{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;margin-bottom:12px;display:block}
-        .step-circle{width:48px;height:48px;border:1px solid var(--border);background:rgba(4,6,10,0.9);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:18px;transition:all 0.3s}
-        .workflow-step:hover .step-circle{border-color:var(--gold);box-shadow:0 0 20px var(--gold-glow)}
-        .step-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:6px;letter-spacing:0.5px}
-        .step-desc{font-size:11px;color:var(--muted);line-height:1.5}
-        .types-section{padding:0 60px 130px;max-width:1200px;margin:0 auto}
-        .types-grid{display:flex;gap:10px;flex-wrap:wrap}
-        .type-pill{display:flex;align-items:center;gap:10px;padding:12px 22px;background:var(--card-bg);border:1px solid var(--border2);font-size:13px;font-weight:500;transition:all 0.3s;cursor:default}
-        .type-pill:hover{border-color:var(--gold);background:var(--gold-dim);color:var(--gold2)}
-        .cta-section{padding:80px 60px 130px;text-align:center;position:relative}
-        .cta-box{max-width:700px;margin:0 auto;background:var(--card-bg);border:1px solid var(--border);padding:72px 56px;position:relative;overflow:hidden}
-        .cta-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold3),var(--gold),transparent)}
-        .cta-title{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:700;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.0}
-        .cta-sub{color:var(--muted);font-size:16px;line-height:1.7;margin-bottom:44px;max-width:480px;margin-left:auto;margin-right:auto}
-        .cta-buttons{display:flex;gap:14px;justify-content:center}
-        .gold-divider{width:60px;height:1px;background:linear-gradient(90deg,var(--gold),var(--gold3));margin:0 auto 24px;opacity:0.6}
-        footer{border-top:1px solid var(--border2);padding:32px 60px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
-        .footer-logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800}
-        .footer-logo span{background:linear-gradient(135deg,var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .footer-copy{font-size:12px;color:var(--muted);letter-spacing:0.5px}
-        .footer-links{display:flex;gap:28px}
-        .footer-links a{font-size:12px;color:var(--muted);text-decoration:none;transition:color 0.3s}
-        .footer-links a:hover{color:var(--gold)}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-        .reveal{opacity:0;transform:translateY(24px);transition:all 0.8s ease}
+        .step-circle{width:44px;height:44px;border-radius:50%;background:var(--white);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:16px;transition:all 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+        .workflow-step:hover .step-circle{border-color:var(--black);box-shadow:0 4px 12px rgba(0,0,0,0.10)}
+        .step-num{font-size:10px;font-weight:600;color:var(--light);letter-spacing:1px;margin-bottom:10px;display:block}
+        .step-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--black)}
+        .step-desc{font-size:11px;color:var(--mid);line-height:1.5}
+
+        /* TYPES */
+        .types-section{padding:0 60px 120px;max-width:1200px;margin:0 auto;background:var(--white)}
+        .types-grid{display:flex;gap:8px;flex-wrap:wrap}
+        .type-pill{display:flex;align-items:center;gap:8px;padding:10px 18px;background:var(--white);border:1px solid var(--border);border-radius:100px;font-size:13px;font-weight:500;transition:all 0.2s;cursor:default;color:var(--dark)}
+        .type-pill:hover{border-color:var(--black);background:var(--black);color:var(--white)}
+
+        /* CTA */
+        .cta-section{padding:80px 60px 120px;background:var(--off)}
+        .cta-box{max-width:640px;margin:0 auto;background:var(--black);border-radius:16px;padding:64px 56px;text-align:center;position:relative;overflow:hidden}
+        .cta-box::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,0.02) 60px,rgba(255,255,255,0.02) 61px),repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,0.02) 60px,rgba(255,255,255,0.02) 61px)}
+        .cta-title{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;letter-spacing:-2px;margin-bottom:16px;line-height:1.0;color:var(--white);position:relative;z-index:1}
+        .cta-sub{color:rgba(255,255,255,0.5);font-size:16px;line-height:1.7;margin-bottom:40px;position:relative;z-index:1}
+        .cta-buttons{display:flex;gap:12px;justify-content:center;position:relative;z-index:1}
+        .btn-cta-primary{background:var(--white);color:var(--black);padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;font-family:'Inter',sans-serif;transition:all 0.2s ease}
+        .btn-cta-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+        .btn-cta-ghost{background:transparent;color:rgba(255,255,255,0.6);padding:14px 32px;border-radius:8px;font-size:14px;font-weight:500;text-decoration:none;border:1px solid rgba(255,255,255,0.15);transition:all 0.2s ease}
+        .btn-cta-ghost:hover{border-color:rgba(255,255,255,0.4);color:var(--white)}
+
+        /* FOOTER */
+        footer{border-top:1px solid var(--border);padding:28px 60px;display:flex;justify-content:space-between;align-items:center;background:var(--white)}
+        .footer-logo{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--black)}
+        .footer-logo span{color:var(--mid)}
+        .footer-copy{font-size:12px;color:var(--light)}
+        .footer-links{display:flex;gap:24px}
+        .footer-links a{font-size:12px;color:var(--mid);text-decoration:none;transition:color 0.2s}
+        .footer-links a:hover{color:var(--black)}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .reveal{opacity:0;transform:translateY(20px);transition:all 0.6s ease}
         .reveal.visible{opacity:1;transform:translateY(0)}
-        @media(max-width:900px){nav{padding:16px 24px}.nav-links{display:none}.hero{padding:100px 24px 60px}.stats-bar{flex-wrap:wrap}.features-grid{grid-template-columns:1fr}.feature-card.large{grid-column:span 1;flex-direction:column}.workflow-steps{grid-template-columns:1fr 1fr;gap:32px}.workflow-steps::before{display:none}.features-section,.workflow-section,.types-section{padding:80px 24px}footer{flex-direction:column;gap:16px;text-align:center}}
+        @media(max-width:900px){nav{padding:0 24px}.nav-links{display:none}.hero{padding:100px 24px 60px}.stats-bar{flex-wrap:wrap}.features-grid{grid-template-columns:1fr}.feature-card.large{grid-column:span 1;flex-direction:column}.workflow-steps{grid-template-columns:1fr 1fr;gap:24px}.workflow-steps::before{display:none}.features-section,.workflow-section,.types-section{padding:80px 24px}footer{flex-direction:column;gap:16px;text-align:center}}
     </style>
 </head>
 <body>
-<canvas id="geo-canvas"></canvas>
-<div class="overlay"></div>
-
 <nav>
     <div class="nav-logo">Nex<span>Label</span></div>
     <ul class="nav-links">
@@ -117,23 +123,28 @@
         <li><a href="#workflow">Workflow</a></li>
         <li><a href="#types">Capabilities</a></li>
     </ul>
-    <a href="login.html" class="nav-cta">Client Login →</a>
+    <a href="login.html" class="nav-cta">Sign in →</a>
 </nav>
 
 <section class="hero">
     <div class="hero-eyebrow">AI Data Annotation Platform</div>
     <h1 class="hero-title">
         Precision Labels.<br>
-        <span class="line2">Faster AI.</span>
+        <span class="accent">Faster AI.</span>
     </h1>
     <p class="hero-sub">
-        NexLabel delivers enterprise-grade annotation with
-        multi-layer QA, real-time dashboards, and a team
-        built for accuracy at scale.
+        Enterprise-grade annotation with multi-layer QA,
+        real-time dashboards, and a team built for
+        accuracy at scale.
     </p>
     <div class="hero-buttons">
-        <a href="login.html" class="btn-primary">Get Started</a>
-        <a href="mailto:contact@nexxlabel.com" class="btn-ghost">Talk to Us</a>
+        <a href="login.html" class="btn-hero-primary">
+            Get started →
+        </a>
+        <a href="mailto:contact@nexxlabel.com"
+            class="btn-hero-ghost">
+            Talk to us
+        </a>
     </div>
     <div class="stats-bar">
         <div class="stat-item">
@@ -181,49 +192,55 @@
 </div>
 
 <section class="features-section" id="features">
-    <p class="section-label reveal">Why NexLabel</p>
-    <h2 class="section-title reveal">Built for teams that<br><span>can't afford mistakes.</span></h2>
+    <p class="section-eyebrow reveal">Why NexLabel</p>
+    <h2 class="section-title reveal">
+        Built for teams that<br>
+        <span>can't afford mistakes.</span>
+    </h2>
     <div class="features-grid reveal">
         <div class="feature-card large">
             <div class="feature-icon-wrap">🧠</div>
             <div>
+                <div class="feature-num">01</div>
                 <div class="feature-name">Multi-Layer Quality Assurance</div>
                 <div class="feature-desc">Every annotation passes through Annotator → Reviewer → Approver before delivery. Rejections trigger automatic email notifications so nothing slips through.</div>
             </div>
-            <div class="feature-num">01</div>
         </div>
         <div class="feature-card">
+            <div class="feature-num">02</div>
             <div class="feature-icon-wrap">⚡</div>
             <div class="feature-name">Real-Time Dashboard</div>
-            <div class="feature-desc">Clients track project progress live. Download completed datasets instantly from their dedicated portal.</div>
-            <div class="feature-num">02</div>
+            <div class="feature-desc">Clients track progress live. Download completed datasets instantly from their dedicated portal.</div>
         </div>
         <div class="feature-card">
+            <div class="feature-num">03</div>
             <div class="feature-icon-wrap">🔐</div>
             <div class="feature-name">Role-Based Access</div>
             <div class="feature-desc">Owner, Sub-Owner, Approver, Reviewer and Annotator — each with precise permissions to protect your data.</div>
-            <div class="feature-num">03</div>
         </div>
         <div class="feature-card">
+            <div class="feature-num">04</div>
             <div class="feature-icon-wrap">🌏</div>
             <div class="feature-name">Remote-First Team</div>
-            <div class="feature-desc">Fully distributed annotation workforce with centralized oversight and real-time task management.</div>
-            <div class="feature-num">04</div>
+            <div class="feature-desc">Fully distributed workforce with centralized oversight and real-time task management.</div>
         </div>
         <div class="feature-card large">
             <div class="feature-icon-wrap">📊</div>
             <div>
+                <div class="feature-num">05</div>
                 <div class="feature-name">Enterprise-Grade Reporting</div>
                 <div class="feature-desc">Track annotator accuracy, task throughput, and QA pass rates across all projects. Full visibility for PMs and clients at all times.</div>
             </div>
-            <div class="feature-num">05</div>
         </div>
     </div>
 </section>
 
 <section class="workflow-section" id="workflow">
-    <p class="section-label reveal">How It Works</p>
-    <h2 class="section-title reveal">From upload to<br><span>delivery in 5 steps.</span></h2>
+    <p class="section-eyebrow reveal">How It Works</p>
+    <h2 class="section-title reveal">
+        From upload to<br>
+        <span>delivery in 5 steps.</span>
+    </h2>
     <div class="workflow-steps reveal">
         <div class="workflow-step">
             <span class="step-num">01</span>
@@ -235,7 +252,7 @@
             <span class="step-num">02</span>
             <div class="step-circle">✏️</div>
             <div class="step-name">Annotation</div>
-            <div class="step-desc">Team labels every item with precision</div>
+            <div class="step-desc">Team labels every item precisely</div>
         </div>
         <div class="workflow-step">
             <span class="step-num">03</span>
@@ -259,32 +276,36 @@
 </section>
 
 <section class="types-section" id="types">
-    <p class="section-label reveal">Capabilities</p>
-    <h2 class="section-title reveal">Every format.<br><span>Every use case.</span></h2>
-    <div class="types-grid reveal">
-        <div class="type-pill"><span>🖼️</span> Image Annotation</div>
-        <div class="type-pill"><span>📦</span> 3D Point Cloud / LiDAR</div>
-        <div class="type-pill"><span>🎥</span> Video Labeling</div>
-        <div class="type-pill"><span>📝</span> Text Classification</div>
-        <div class="type-pill"><span>🎵</span> Audio Transcription</div>
-        <div class="type-pill"><span>🔲</span> Bounding Boxes</div>
-        <div class="type-pill"><span>🗺️</span> Semantic Segmentation</div>
-        <div class="type-pill"><span>🏷️</span> Named Entity Recognition</div>
-        <div class="type-pill"><span>😊</span> Sentiment Analysis</div>
-        <div class="type-pill"><span>🎯</span> Object Detection</div>
-        <div class="type-pill"><span>🔑</span> Keypoint Detection</div>
-        <div class="type-pill"><span>📋</span> Document OCR</div>
+    <div style="max-width:1200px;margin:0 auto;padding:0 0 120px;">
+        <p class="section-eyebrow reveal">Capabilities</p>
+        <h2 class="section-title reveal">
+            Every format.<br>
+            <span>Every use case.</span>
+        </h2>
+        <div class="types-grid reveal">
+            <div class="type-pill"><span>🖼️</span> Image Annotation</div>
+            <div class="type-pill"><span>📦</span> 3D Point Cloud / LiDAR</div>
+            <div class="type-pill"><span>🎥</span> Video Labeling</div>
+            <div class="type-pill"><span>📝</span> Text Classification</div>
+            <div class="type-pill"><span>🎵</span> Audio Transcription</div>
+            <div class="type-pill"><span>🔲</span> Bounding Boxes</div>
+            <div class="type-pill"><span>🗺️</span> Semantic Segmentation</div>
+            <div class="type-pill"><span>🏷️</span> Named Entity Recognition</div>
+            <div class="type-pill"><span>😊</span> Sentiment Analysis</div>
+            <div class="type-pill"><span>🎯</span> Object Detection</div>
+            <div class="type-pill"><span>🔑</span> Keypoint Detection</div>
+            <div class="type-pill"><span>📋</span> Document OCR</div>
+        </div>
     </div>
 </section>
 
 <section class="cta-section">
     <div class="cta-box reveal">
-        <div class="gold-divider"></div>
         <h2 class="cta-title">Ready to label<br>at scale?</h2>
         <p class="cta-sub">Join companies already using NexLabel to power their AI with clean, verified training data.</p>
         <div class="cta-buttons">
-            <a href="login.html" class="btn-primary">Access Platform</a>
-            <a href="mailto:contact@nexxlabel.com" class="btn-ghost">Get in Touch</a>
+            <a href="login.html" class="btn-cta-primary">Access platform →</a>
+            <a href="mailto:contact@nexxlabel.com" class="btn-cta-ghost">Get in touch</a>
         </div>
     </div>
 </section>
@@ -299,319 +320,37 @@
 </footer>
 
 <script>
-// ══════════════════════════════════════════
-// SACRED GEOMETRY BACKGROUND
-// Flower of Life, Metatron's Cube,
-// Sri Yantra triangles, rotating rings
-// ══════════════════════════════════════════
-const canvas = document.getElementById('geo-canvas');
-const ctx = canvas.getContext('2d');
-let W, H, t = 0;
-
-function resize(){
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+function animateCounter(el, target) {
+    let c = 0; const step = target / 60;
+    const t = setInterval(() => {
+        c += step;
+        if (c >= target) { c = target; clearInterval(t); }
+        el.textContent = Math.floor(c);
+    }, 25);
 }
 
-// Gold color with opacity
-function gold(a){ return `rgba(201,168,76,${a})`; }
-function gold2(a){ return `rgba(245,224,160,${a})`; }
-
-// Draw regular polygon
-function polygon(cx,cy,r,sides,rotation){
-    ctx.beginPath();
-    for(let i=0;i<sides;i++){
-        const ang = rotation + (i/sides)*Math.PI*2;
-        const x = cx + Math.cos(ang)*r;
-        const y = cy + Math.sin(ang)*r;
-        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    }
-    ctx.closePath();
-}
-
-// Draw star polygon (pentagram, hexagram etc)
-function starPolygon(cx,cy,r,points,rotation){
-    ctx.beginPath();
-    for(let i=0;i<points*2;i++){
-        const ang = rotation + (i/(points*2))*Math.PI*2;
-        const rad = i%2===0 ? r : r*0.4;
-        const x = cx + Math.cos(ang)*rad;
-        const y = cy + Math.sin(ang)*rad;
-        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    }
-    ctx.closePath();
-}
-
-// Draw Flower of Life circle cluster
-function flowerOfLife(cx,cy,r,alpha){
-    const positions = [
-        {x:0,y:0},
-        {x:r,y:0},{x:-r,y:0},
-        {x:r/2,y:r*0.866},{x:-r/2,y:r*0.866},
-        {x:r/2,y:-r*0.866},{x:-r/2,y:-r*0.866},
-    ];
-    positions.forEach(p=>{
-        ctx.beginPath();
-        ctx.arc(cx+p.x,cy+p.y,r,0,Math.PI*2);
-        ctx.strokeStyle=gold(alpha);
-        ctx.lineWidth=0.5;
-        ctx.stroke();
-    });
-}
-
-// Draw Metatron's Cube lines
-function metatronCube(cx,cy,r,alpha){
-    const pts = [];
-    for(let i=0;i<6;i++){
-        const ang = (i/6)*Math.PI*2 - Math.PI/6;
-        pts.push({x:cx+Math.cos(ang)*r, y:cy+Math.sin(ang)*r});
-    }
-    pts.push({x:cx,y:cy}); // center
-
-    // Connect all points
-    for(let i=0;i<pts.length;i++){
-        for(let j=i+1;j<pts.length;j++){
-            ctx.beginPath();
-            ctx.moveTo(pts[i].x,pts[i].y);
-            ctx.lineTo(pts[j].x,pts[j].y);
-            ctx.strokeStyle=gold(alpha*0.6);
-            ctx.lineWidth=0.4;
-            ctx.stroke();
-        }
-    }
-
-    // Outer hexagon
-    polygon(cx,cy,r,6,-Math.PI/6);
-    ctx.strokeStyle=gold(alpha);
-    ctx.lineWidth=0.6;
-    ctx.stroke();
-
-    // Inner hexagon rotated
-    polygon(cx,cy,r*0.577,6,Math.PI/6);
-    ctx.strokeStyle=gold(alpha*0.8);
-    ctx.lineWidth=0.5;
-    ctx.stroke();
-}
-
-// Shapes config
-function buildShapes(){
-    return [
-        // Large central flower of life — center
-        { type:'flower', x:0.5, y:0.5, r:90, speed:0.00012, rot:0, alpha:0.10, drift:0.02 },
-
-        // Metatron's cubes
-        { type:'metatron', x:0.15, y:0.2,  r:110, speed:0.0002,  rot:0, alpha:0.12, drift:0.03 },
-        { type:'metatron', x:0.85, y:0.75, r:130, speed:0.00015, rot:1, alpha:0.10, drift:0.025 },
-        { type:'metatron', x:0.5,  y:0.15, r:80,  speed:0.00025, rot:2, alpha:0.08, drift:0.04 },
-
-        // Rotating hexagons
-        { type:'hex', x:0.08, y:0.6,  r:70,  speed:0.0003,  rot:0, alpha:0.10, drift:0.035 },
-        { type:'hex', x:0.92, y:0.3,  r:85,  speed:0.00025, rot:1, alpha:0.09, drift:0.03 },
-        { type:'hex', x:0.3,  y:0.88, r:65,  speed:0.0004,  rot:2, alpha:0.08, drift:0.04 },
-        { type:'hex', x:0.75, y:0.1,  r:55,  speed:0.00035, rot:3, alpha:0.07, drift:0.03 },
-
-        // Triangles (Sri Yantra inspired)
-        { type:'tri', x:0.2,  y:0.5,  r:80,  speed:0.0002,  rot:0,           alpha:0.09, drift:0.03 },
-        { type:'tri', x:0.8,  y:0.5,  r:90,  speed:0.00025, rot:Math.PI,     alpha:0.08, drift:0.025 },
-        { type:'tri', x:0.5,  y:0.7,  r:70,  speed:0.0003,  rot:Math.PI/6,  alpha:0.07, drift:0.035 },
-
-        // Stars
-        { type:'star6', x:0.35, y:0.15, r:50, speed:0.0004, rot:0, alpha:0.10, drift:0.04 },
-        { type:'star6', x:0.65, y:0.85, r:60, speed:0.0003, rot:1, alpha:0.09, drift:0.03 },
-        { type:'star8', x:0.1,  y:0.35, r:45, speed:0.0005, rot:0, alpha:0.08, drift:0.04 },
-        { type:'star8', x:0.9,  y:0.55, r:50, speed:0.0004, rot:2, alpha:0.08, drift:0.035 },
-
-        // Concentric circles
-        { type:'rings', x:0.5,  y:0.5,  r:200, speed:0.00008, rot:0, alpha:0.06, drift:0.01 },
-        { type:'rings', x:0.2,  y:0.8,  r:120, speed:0.00015, rot:0, alpha:0.07, drift:0.02 },
-        { type:'rings', x:0.8,  y:0.2,  r:100, speed:0.0002,  rot:0, alpha:0.07, drift:0.025 },
-
-        // Pentagrams
-        { type:'star5', x:0.25, y:0.35, r:55, speed:0.0003, rot:0, alpha:0.08, drift:0.035 },
-        { type:'star5', x:0.75, y:0.65, r:65, speed:0.00025,rot:1, alpha:0.08, drift:0.03 },
-    ];
-}
-
-let shapes = [];
-
-function draw(){
-    ctx.clearRect(0,0,W,H);
-    t += 1;
-
-    shapes.forEach((s,idx)=>{
-        const rot = s.rot + t * s.speed * 1000;
-        const dx  = Math.sin(t * s.speed * 800 + idx) * s.drift;
-        const dy  = Math.cos(t * s.speed * 700 + idx) * s.drift;
-        const cx  = (s.x + dx) * W;
-        const cy  = (s.y + dy) * H;
-
-        ctx.save();
-        ctx.translate(cx,cy);
-        ctx.rotate(rot);
-
-        switch(s.type){
-            case 'flower':
-                flowerOfLife(0,0,s.r,s.alpha);
-                break;
-
-            case 'metatron':
-                metatronCube(0,0,s.r,s.alpha);
-                break;
-
-            case 'hex':
-                // Double hexagon (inner+outer)
-                polygon(0,0,s.r,6,0);
-                ctx.strokeStyle=gold(s.alpha);
-                ctx.lineWidth=0.6;
-                ctx.stroke();
-
-                polygon(0,0,s.r,6,Math.PI/6);
-                ctx.strokeStyle=gold(s.alpha*0.6);
-                ctx.lineWidth=0.4;
-                ctx.stroke();
-
-                polygon(0,0,s.r*0.6,6,0);
-                ctx.strokeStyle=gold(s.alpha*0.5);
-                ctx.lineWidth=0.4;
-                ctx.stroke();
-
-                // Center dot
-                ctx.beginPath();
-                ctx.arc(0,0,2,0,Math.PI*2);
-                ctx.fillStyle=gold(s.alpha*0.8);
-                ctx.fill();
-                break;
-
-            case 'tri':
-                // Two overlapping triangles = Star of David
-                polygon(0,0,s.r,3,0);
-                ctx.strokeStyle=gold(s.alpha);
-                ctx.lineWidth=0.6;
-                ctx.stroke();
-
-                polygon(0,0,s.r,3,Math.PI);
-                ctx.strokeStyle=gold(s.alpha*0.7);
-                ctx.lineWidth=0.5;
-                ctx.stroke();
-
-                // Inner circle
-                ctx.beginPath();
-                ctx.arc(0,0,s.r*0.35,0,Math.PI*2);
-                ctx.strokeStyle=gold(s.alpha*0.5);
-                ctx.lineWidth=0.4;
-                ctx.stroke();
-                break;
-
-            case 'star5':
-                starPolygon(0,0,s.r,5,0);
-                ctx.strokeStyle=gold(s.alpha);
-                ctx.lineWidth=0.5;
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.arc(0,0,s.r,0,Math.PI*2);
-                ctx.strokeStyle=gold(s.alpha*0.3);
-                ctx.lineWidth=0.3;
-                ctx.stroke();
-                break;
-
-            case 'star6':
-                starPolygon(0,0,s.r,6,0);
-                ctx.strokeStyle=gold(s.alpha);
-                ctx.lineWidth=0.5;
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.arc(0,0,s.r,0,Math.PI*2);
-                ctx.strokeStyle=gold(s.alpha*0.3);
-                ctx.lineWidth=0.3;
-                ctx.stroke();
-                break;
-
-            case 'star8':
-                starPolygon(0,0,s.r,8,0);
-                ctx.strokeStyle=gold(s.alpha);
-                ctx.lineWidth=0.5;
-                ctx.stroke();
-
-                polygon(0,0,s.r*0.7,8,Math.PI/8);
-                ctx.strokeStyle=gold(s.alpha*0.4);
-                ctx.lineWidth=0.3;
-                ctx.stroke();
-                break;
-
-            case 'rings':
-                // 5 concentric rings slowly pulsing
-                for(let ri=1;ri<=5;ri++){
-                    const pulse = 1 + Math.sin(t*0.02 + ri)*0.03;
-                    ctx.beginPath();
-                    ctx.arc(0,0,s.r*(ri/5)*pulse,0,Math.PI*2);
-                    ctx.strokeStyle=gold(s.alpha*(1-ri*0.12));
-                    ctx.lineWidth=0.4;
-                    ctx.stroke();
-                }
-                // Cross lines through rings
-                for(let li=0;li<6;li++){
-                    const ang = (li/6)*Math.PI*2;
-                    ctx.beginPath();
-                    ctx.moveTo(Math.cos(ang)*s.r*0.2, Math.sin(ang)*s.r*0.2);
-                    ctx.lineTo(Math.cos(ang)*s.r, Math.sin(ang)*s.r);
-                    ctx.strokeStyle=gold(s.alpha*0.4);
-                    ctx.lineWidth=0.3;
-                    ctx.stroke();
-                }
-                break;
-        }
-
-        ctx.restore();
-    });
-
-    requestAnimationFrame(draw);
-}
-
-function init(){
-    resize();
-    shapes = buildShapes();
-    draw();
-}
-
-init();
-window.addEventListener('resize',()=>{ resize(); shapes=buildShapes(); });
-
-// COUNTERS
-function animateCounter(el,target){
-    let c=0; const step=target/60;
-    const tmr=setInterval(()=>{
-        c+=step;
-        if(c>=target){c=target;clearInterval(tmr);}
-        el.textContent=Math.floor(c);
-    },25);
-}
-
-// REVEAL
-const ro=new IntersectionObserver((entries)=>{
-    entries.forEach((e,i)=>{
-        if(e.isIntersecting){
-            setTimeout(()=>e.target.classList.add('visible'),i*100);
+const ro = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+            setTimeout(() => e.target.classList.add('visible'), i * 80);
             ro.unobserve(e.target);
         }
     });
-},{threshold:0.1});
-document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
 
-// STAT COUNTERS
-const so=new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-        if(e.isIntersecting){
-            e.target.querySelectorAll('[data-target]').forEach(el=>{
-                animateCounter(el,parseInt(el.dataset.target));
+const so = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.querySelectorAll('[data-target]').forEach(el => {
+                animateCounter(el, parseInt(el.dataset.target));
             });
             so.unobserve(e.target);
         }
     });
-},{threshold:0.5});
-const sb=document.querySelector('.stats-bar');
-if(sb) so.observe(sb);
+}, { threshold: 0.5 });
+const sb = document.querySelector('.stats-bar');
+if (sb) so.observe(sb);
 </script>
 </body>
 </html>

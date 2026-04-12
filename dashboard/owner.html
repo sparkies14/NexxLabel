@@ -126,14 +126,11 @@
             <div class="topbar-right">
                 <div class="user-info">
                     <span id="userName">Erwin</span>
-                    <span class="role-badge"
-                        style="background:rgba(255,176,32,0.1);
-                        border-color:#ffb020;
-                        color:#ffb020;">
-                        👑 Owner
+                    <span class="role-badge role-owner">
+                        Owner
                     </span>
                     <button class="btn btn-outline"
-                        onclick="signOut()"
+                        onclick="logout()"
                         style="padding:6px 12px;
                         font-size:12px;">
                         Logout
@@ -338,10 +335,7 @@
                     <div class="team-avatar">M</div>
                     <div style="flex:1;">
                         <div style="font-weight:600;">Mark Santos</div>
-                        <span class="role-badge"
-                            style="font-size:11px;">
-                            Sub-Owner
-                        </span>
+                        <span class="role-badge role-owner" style="font-size:11px;">Sub-Owner</span>
                     </div>
                     <button class="delete-btn"
                         onclick="deleteMember(this)">
@@ -352,10 +346,7 @@
                     <div class="team-avatar">A</div>
                     <div style="flex:1;">
                         <div style="font-weight:600;">Anna Cruz</div>
-                        <span class="role-badge"
-                            style="font-size:11px;">
-                            Approver
-                        </span>
+                        <span class="role-badge role-approver" style="font-size:11px;">Approver</span>
                     </div>
                     <button class="delete-btn"
                         onclick="deleteMember(this)">
@@ -366,10 +357,7 @@
                     <div class="team-avatar">S</div>
                     <div style="flex:1;">
                         <div style="font-weight:600;">Sarah Chen</div>
-                        <span class="role-badge"
-                            style="font-size:11px;">
-                            Reviewer
-                        </span>
+                        <span class="role-badge role-reviewer" style="font-size:11px;">Reviewer</span>
                     </div>
                     <button class="delete-btn"
                         onclick="deleteMember(this)">
@@ -380,10 +368,7 @@
                     <div class="team-avatar">J</div>
                     <div style="flex:1;">
                         <div style="font-weight:600;">John Doe</div>
-                        <span class="role-badge"
-                            style="font-size:11px;">
-                            Annotator
-                        </span>
+                        <span class="role-badge role-annotator" style="font-size:11px;">Annotator</span>
                     </div>
                     <button class="delete-btn"
                         onclick="deleteMember(this)">
@@ -394,10 +379,7 @@
                     <div class="team-avatar">M</div>
                     <div style="flex:1;">
                         <div style="font-weight:600;">Maria Santos</div>
-                        <span class="role-badge"
-                            style="font-size:11px;">
-                            Annotator
-                        </span>
+                        <span class="role-badge role-annotator" style="font-size:11px;">Annotator</span>
                     </div>
                     <button class="delete-btn"
                         onclick="deleteMember(this)">
@@ -408,10 +390,7 @@
                     <div class="team-avatar">C</div>
                     <div style="flex:1;">
                         <div style="font-weight:600;">Carlo Reyes</div>
-                        <span class="role-badge"
-                            style="font-size:11px;">
-                            Annotator
-                        </span>
+                        <span class="role-badge role-annotator" style="font-size:11px;">Annotator</span>
                     </div>
                     <button class="delete-btn"
                         onclick="deleteMember(this)">
@@ -604,12 +583,8 @@
                         <div style="font-weight:600;">
                             ${member.full_name}
                         </div>
-                        <span class="role-badge"
-                            style="font-size:11px;">
-                            ${member.role
-                                .charAt(0)
-                                .toUpperCase() + 
-                                member.role.slice(1)}
+                        <span class="role-badge role-${member.role}" style="font-size:11px;">
+                            ${member.role.charAt(0).toUpperCase() + member.role.slice(1)}
                         </span>
                     </div>
                     <button class="delete-btn owner-only"

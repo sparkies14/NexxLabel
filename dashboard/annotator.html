@@ -76,7 +76,7 @@
                 </div>
                 <div class="user-info">
                     <span id="userName">John Doe</span>
-                    <span class="role-badge role-annotator">Annotator</span>
+                    <span class="role-badge">Annotator</span>
                     <button class="btn btn-outline" 
                         onclick="logout()" 
                         style="padding:6px 12px; font-size:12px;">
@@ -266,7 +266,7 @@
                 <button class="btn ${
                     task.status === 'rejected' 
                     ? 'btn-danger' : 'btn-primary'
-                }" onclick="startTask('${task.id}')">
+                }" onclick="startTask('${task.id}', '${task.type}', '${task.title}')">
                     ${task.status === 'rejected' 
                     ? 'Fix Now' : 'Start →'}
                 </button>
@@ -274,10 +274,24 @@
         `).join('');
     }
 
-    async function startTask(taskId) {
-        alert('Opening task workspace...\n' +
-            'Full annotation workspace coming next!');
-    }
+    function startTask(taskId, type, title) {
+    type = type || 'text';
+    title = title || 'Annotation Task';
+
+    const routes = {
+        text:  'workspace-text.html',
+        image: 'workspace-image.html',
+        bbox:  'workspace-bbox.html',
+        video: 'workspace-video.html',
+    };
+
+    const workspace = routes[type] 
+        || routes.text;
+
+    window.location.href = 
+        `${workspace}?taskId=${taskId}` +
+        `&title=${encodeURIComponent(title)}`;
+}
 </script>
 
 </body>

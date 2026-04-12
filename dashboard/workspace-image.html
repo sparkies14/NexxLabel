@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+        content="width=device-width, 
+        initial-scale=1.0">
+    <title>NexLabel — Image Classification</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+        .work-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+        .label-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .task-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--black);
+        }
+        .progress-steps {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .pstep {
+            flex: 1;
+            height: 3px;
+            border-radius: 99px;
+            background: var(--lighter);
+            transition: background 0.3s;
+        }
+        .pstep.done { background: var(--black); }
+        .pstep.current {
+            background: var(--dark);
+            opacity: 0.5;
+        }
+        /* Image viewer */
+        .image-viewer {
+            flex: 1;
+            background: var(--off);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            min-height: 0;
+        }
+        .image-viewer img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .image-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: var(--mid);
+        }
+        .image-placeholder-icon {
+            font-size: 48px;
+            opacity: 0.3;
+        }
+        .image-placeholder-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .image-placeholder-sub {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+        /* Image controls */
+        .image-controls {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .img-ctrl-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--white);
+            color: var(--mid);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .img-ctrl-btn:hover {
+            border-color: var(--black);
+            color: var(--black);
+        }
+        /* Nav row */
+        .nav-row {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        /* Label buttons */
+        .panel-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--black);
+        }
+        .label-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .label-btn {
+            padding: 14px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--dark);
+            cursor: pointer;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .label-btn:hover {
+            border-color: var(--black);
+            background: var(--lightest);
+            transform: translateY(-1px);
+        }
+        .label-btn.selected {
+            border-color: var(--black);
+            background: var(--black);
+            color: var(--white);
+        }
+        .label-btn-icon { font-size: 20px; }
+        .label-btn-key {
+            font-size: 10px;
+            opacity: 0.5;
+            font-weight: 400;
+        }
+        .panel-divider {
+            height: 1px;
+            background: var(--border);
+        }
+        .selected-display {
+            padding: 10px 14px;
+            background: var(--lightest);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--mid);
+        }
+        .selected-display strong {
+            color: var(--black);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover {
+            background: var(--dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .save-btn {
+            width: 100%;
+            padding: 9px;
+            background: transparent;
+            color: var(--mid);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .save-btn:hover {
+            border-color: var(--black);
+            color: var(--black);
+        }
+        .notes-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: var(--dark);
+            background: var(--white);
+            resize: none;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .notes-input:focus {
+            border-color: var(--black);
+        }
+        .image-meta {
+            font-size: 11px;
+            color: var(--mid);
+            text-align: center;
+        }
+        .zoom-badge {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .instruction {
+            font-size: 12px;
+            color: var(--mid);
+            line-height: 1.5;
+            padding: 10px 14px;
+            background: var(--lightest);
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            Nex<span>Label</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="annotator.html">
+                    ← Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="#" class="active">
+                    🖼️ Image Workspace
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div>
+                <h1 id="taskTitle">
+                    Loading task...
+                </h1>
+                <p style="color:var(--mid);
+                    font-size:13px;margin-top:2px;">
+                    Image Classification Workspace
+                </p>
+            </div>
+            <div class="topbar-right">
+                <span id="userName"
+                    style="color:var(--mid);
+                    font-size:13px;">
+                </span>
+                <span class="role-badge">
+                    Annotator
+                </span>
+                <button class="btn btn-outline"
+                    onclick="logout()"
+                    style="padding:6px 14px;
+                    font-size:12px;">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="progress-steps"
+            id="progressSteps">
+        </div>
+
+        <div style="margin-top:16px">
+        <div class="workspace-layout">
+            <!-- Work Panel -->
+            <div class="work-panel">
+                <div class="task-header">
+                    <div class="task-title"
+                        id="itemTitle">
+                        Image 1 of 5
+                    </div>
+                    <div style="display:flex;
+                        align-items:center;gap:10px;">
+                        <div class="image-controls">
+                            <button
+                                class="img-ctrl-btn"
+                                onclick="zoomIn()">
+                                🔍+
+                            </button>
+                            <button
+                                class="img-ctrl-btn"
+                                onclick="zoomOut()">
+                                🔍-
+                            </button>
+                            <button
+                                class="img-ctrl-btn"
+                                onclick="resetZoom()">
+                                ↺ Reset
+                            </button>
+                        </div>
+                        <span class="badge
+                            badge-image">
+                            Image
+                        </span>
+                        <span class="badge
+                            badge-medium"
+                            id="priorityBadge">
+                            Medium
+                        </span>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    Look at the image carefully 
+                    and select the correct category 
+                    from the panel on the right.
+                    Use keyboard shortcuts [1-6] 
+                    for faster labeling.
+                </div>
+
+                <!-- Image Viewer -->
+                <div class="image-viewer"
+                    id="imageViewer">
+                    <div class="image-placeholder"
+                        id="imagePlaceholder">
+                        <div class="image-placeholder-icon">
+                            🖼️
+                        </div>
+                        <div class="image-placeholder-text">
+                            Sample Image
+                        </div>
+                        <div class="image-placeholder-sub"
+                            id="imageName">
+                            Loading...
+                        </div>
+                    </div>
+                    <img id="mainImage"
+                        style="display:none;"
+                        alt="Annotation image">
+                    <div class="zoom-badge"
+                        id="zoomBadge">
+                        100%
+                    </div>
+                </div>
+
+                <div class="image-meta"
+                    id="imageMeta">
+                </div>
+
+                <!-- Nav -->
+                <div class="nav-row">
+                    <button class="btn btn-outline"
+                        onclick="prevItem()"
+                        id="prevBtn"
+                        style="display:none;
+                        padding:10px 20px;">
+                        ← Previous
+                    </button>
+                    <button class="btn btn-primary"
+                        onclick="nextItem()"
+                        id="nextBtn"
+                        style="padding:10px 20px;">
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Label Panel -->
+            <div class="label-panel">
+                <div class="panel-title">
+                    Categories
+                </div>
+                <div style="font-size:11px;
+                    color:var(--mid);">
+                    Press [1-6] to select quickly
+                </div>
+
+                <div class="label-grid"
+                    id="labelGrid">
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <div class="panel-title">
+                    Selected
+                </div>
+                <div class="selected-display"
+                    id="selectedDisplay">
+                    <strong style="color:var(--mid)">
+                        None selected
+                    </strong>
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <div class="panel-title">
+                    Confidence
+                </div>
+                <div style="display:flex;
+                    flex-direction:column;gap:6px;">
+                    <label style="display:flex;
+                        align-items:center;gap:8px;
+                        font-size:13px;
+                        color:var(--mid);
+                        cursor:pointer;">
+                        <input type="radio"
+                            name="confidence"
+                            value="high"
+                            style="accent-color:var(--black)">
+                        High confidence
+                    </label>
+                    <label style="display:flex;
+                        align-items:center;gap:8px;
+                        font-size:13px;
+                        color:var(--mid);
+                        cursor:pointer;">
+                        <input type="radio"
+                            name="confidence"
+                            value="medium"
+                            style="accent-color:var(--black)"
+                            checked>
+                        Medium confidence
+                    </label>
+                    <label style="display:flex;
+                        align-items:center;gap:8px;
+                        font-size:13px;
+                        color:var(--mid);
+                        cursor:pointer;">
+                        <input type="radio"
+                            name="confidence"
+                            value="low"
+                            style="accent-color:var(--black)">
+                        Low / Unsure
+                    </label>
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <div class="panel-title">Notes</div>
+                <textarea class="notes-input"
+                    id="notesInput"
+                    rows="3"
+                    placeholder="Optional notes...">
+                </textarea>
+
+                <div class="panel-divider"></div>
+
+                <button class="submit-btn"
+                    onclick="submitTask()"
+                    id="submitBtn">
+                    Submit for Review
+                </button>
+                <button class="save-btn"
+                    onclick="saveProgress()">
+                    Save progress
+                </button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+    let currentItem = 0;
+    let zoomLevel = 100;
+
+    // Sample image items
+    // Replace src with real Supabase URLs later
+    const ITEMS = [
+        {
+            id:1,
+            name:'product_001.jpg',
+            src: null,
+            emoji: '👟',
+            desc: 'Athletic footwear product',
+            label: null
+        },
+        {
+            id:2,
+            name:'product_002.jpg',
+            src: null,
+            emoji: '👜',
+            desc: 'Leather handbag product',
+            label: null
+        },
+        {
+            id:3,
+            name:'product_003.jpg',
+            src: null,
+            emoji: '⌚',
+            desc: 'Smart watch product',
+            label: null
+        },
+        {
+            id:4,
+            name:'product_004.jpg',
+            src: null,
+            emoji: '🎧',
+            desc: 'Wireless headphones',
+            label: null
+        },
+        {
+            id:5,
+            name:'product_005.jpg',
+            src: null,
+            emoji: '💻',
+            desc: 'Laptop computer',
+            label: null
+        },
+    ];
+
+    const LABELS = [
+        {label:'Footwear',      key:'1', icon:'👟'},
+        {label:'Bags',          key:'2', icon:'👜'},
+        {label:'Electronics',   key:'3', icon:'📱'},
+        {label:'Accessories',   key:'4', icon:'⌚'},
+        {label:'Clothing',      key:'5', icon:'👕'},
+        {label:'Other',         key:'6', icon:'📦'},
+    ];
+
+    window.onload = async function() {
+        try {
+            const profile = await requireAuth();
+            if (!profile) return;
+            loadUserInfo(profile);
+
+            const params = new URLSearchParams(
+                window.location.search
+            );
+            document.getElementById('taskTitle')
+                .textContent =
+                params.get('title') ||
+                'Image Classification Task';
+
+            buildProgressSteps();
+            renderLabels();
+            loadItem(0);
+            setupKeys();
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    function buildProgressSteps() {
+        document.getElementById('progressSteps')
+            .innerHTML = ITEMS.map((_,i) =>
+            `<div class="pstep ${
+                i===0?'current':''
+            }" id="pstep-${i}"></div>`
+        ).join('');
+    }
+
+    function renderLabels() {
+        document.getElementById('labelGrid')
+            .innerHTML = LABELS.map(l => `
+            <button class="label-btn ${
+                ITEMS[currentItem].label===l.label
+                ?'selected':''
+            }"
+            onclick="selectLabel('${l.label}')">
+                <span class="label-btn-icon">
+                    ${l.icon}
+                </span>
+                ${l.label}
+                <span class="label-btn-key">
+                    [${l.key}]
+                </span>
+            </button>
+        `).join('');
+    }
+
+    function loadItem(index) {
+        currentItem = index;
+        const item = ITEMS[index];
+
+        document.getElementById('itemTitle')
+            .textContent =
+            `Image ${index+1} of ${ITEMS.length}`;
+
+        // Show placeholder with emoji
+        // (replace with real img when connected)
+        const ph = document
+            .getElementById('imagePlaceholder');
+        const img = document
+            .getElementById('mainImage');
+        const meta = document
+            .getElementById('imageMeta');
+
+        if (item.src) {
+            ph.style.display = 'none';
+            img.style.display = 'block';
+            img.src = item.src;
+        } else {
+            ph.style.display = 'flex';
+            img.style.display = 'none';
+            ph.querySelector(
+                '.image-placeholder-icon'
+            ).textContent = item.emoji;
+            ph.querySelector(
+                '.image-placeholder-text'
+            ).textContent = item.desc;
+            document.getElementById('imageName')
+                .textContent = item.name;
+        }
+
+        meta.textContent =
+            `File: ${item.name}`;
+
+        renderLabels();
+        updateSelected(item.label);
+        updateSteps(index);
+
+        // Nav buttons
+        document.getElementById('prevBtn')
+            .style.display =
+            index > 0 ? 'block' : 'none';
+        document.getElementById('nextBtn')
+            .textContent =
+            index === ITEMS.length-1
+            ? 'Last Item' : 'Next →';
+
+        // Reset zoom
+        zoomLevel = 100;
+        applyZoom();
+    }
+
+    function selectLabel(label) {
+        ITEMS[currentItem].label = label;
+        renderLabels();
+        updateSelected(label);
+    }
+
+    function updateSelected(label) {
+        const d = document
+            .getElementById('selectedDisplay');
+        if (label) {
+            const l = LABELS.find(
+                x => x.label === label
+            );
+            d.innerHTML = `
+                <strong>
+                    ${l ? l.icon : ''} ${label}
+                </strong>`;
+        } else {
+            d.innerHTML =
+                `<strong style="color:var(--mid)">
+                    None selected
+                </strong>`;
+        }
+    }
+
+    function updateSteps(index) {
+        ITEMS.forEach((_,i) => {
+            const s = document
+                .getElementById('pstep-'+i);
+            if (!s) return;
+            s.className = 'pstep';
+            if (i < index) s.classList.add('done');
+            if (i === index)
+                s.classList.add('current');
+        });
+    }
+
+    function nextItem() {
+        if (!ITEMS[currentItem].label) {
+            alert('Please select a category first!');
+            return;
+        }
+        if (currentItem < ITEMS.length - 1) {
+            loadItem(currentItem + 1);
+        }
+    }
+
+    function prevItem() {
+        if (currentItem > 0) {
+            loadItem(currentItem - 1);
+        }
+    }
+
+    // Zoom controls
+    function zoomIn() {
+        zoomLevel = Math.min(zoomLevel + 25, 300);
+        applyZoom();
+    }
+    function zoomOut() {
+        zoomLevel = Math.max(zoomLevel - 25, 50);
+        applyZoom();
+    }
+    function resetZoom() {
+        zoomLevel = 100;
+        applyZoom();
+    }
+    function applyZoom() {
+        const img = document
+            .getElementById('mainImage');
+        img.style.transform =
+            `scale(${zoomLevel/100})`;
+        document.getElementById('zoomBadge')
+            .textContent = `${zoomLevel}%`;
+    }
+
+    function setupKeys() {
+        document.addEventListener('keydown', e => {
+            if (e.target.tagName === 'TEXTAREA')
+                return;
+            const found = LABELS.find(
+                l => l.key === e.key
+            );
+            if (found) selectLabel(found.label);
+            if (e.key === 'ArrowRight') nextItem();
+            if (e.key === 'ArrowLeft') prevItem();
+            if (e.key === '+') zoomIn();
+            if (e.key === '-') zoomOut();
+        });
+    }
+
+    async function submitTask() {
+        const unlabeled = ITEMS.filter(
+            i => !i.label
+        );
+        if (unlabeled.length > 0) {
+            alert(`${unlabeled.length} images 
+                still need labels!`);
+            return;
+        }
+        const btn = document
+            .getElementById('submitBtn');
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+        try {
+            const params = new URLSearchParams(
+                window.location.search
+            );
+            const taskId = params.get('taskId');
+            if (taskId && taskId !== 'demo') {
+                await submitTask(taskId);
+            }
+            alert('✅ Task submitted!\n' +
+                'Sent to reviewer queue.');
+            window.location.href =
+                'annotator.html';
+        } catch(e) {
+            alert('Error: ' + e.message);
+            btn.textContent = 'Submit for Review';
+            btn.disabled = false;
+        }
+    }
+
+    function saveProgress() {
+        localStorage.setItem(
+            'nexxlabel_image_progress',
+            JSON.stringify(ITEMS)
+        );
+        const btn = document
+            .querySelector('.save-btn');
+        btn.textContent = '✓ Saved!';
+        setTimeout(() =>
+            btn.textContent = 'Save progress',
+        2000);
+    }
+    </script>
+</body>
+</html>

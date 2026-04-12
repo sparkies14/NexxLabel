@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+        content="width=device-width, 
+        initial-scale=1.0">
+    <title>NexLabel — Bounding Box</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+        .work-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow: hidden;
+        }
+        .label-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .task-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .progress-steps {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .pstep {
+            flex: 1; height: 3px;
+            border-radius: 99px;
+            background: var(--lighter);
+            transition: background 0.3s;
+        }
+        .pstep.done { background: var(--black); }
+        .pstep.current {
+            background: var(--dark);
+            opacity: 0.5;
+        }
+        /* Canvas container */
+        .canvas-wrap {
+            flex: 1;
+            position: relative;
+            background: var(--off);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            min-height: 0;
+            cursor: crosshair;
+        }
+        #bbox-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            touch-action: none;
+        }
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .tool-btn {
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--white);
+            color: var(--mid);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tool-btn:hover {
+            border-color: var(--black);
+            color: var(--black);
+        }
+        .tool-btn.active {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+        .tool-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+        /* Nav row */
+        .nav-row {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        /* Right panel */
+        .panel-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--black);
+        }
+        .panel-divider {
+            height: 1px;
+            background: var(--border);
+        }
+        /* Class selector */
+        .class-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .class-btn {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--dark);
+            cursor: pointer;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .class-btn:hover {
+            border-color: var(--black);
+        }
+        .class-btn.active {
+            border-color: var(--black);
+            background: var(--black);
+            color: var(--white);
+        }
+        .class-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .class-btn-inner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        /* Boxes list */
+        .boxes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .box-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            background: var(--lightest);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .box-item:hover {
+            border-color: var(--black);
+        }
+        .box-item.selected-box {
+            border-color: var(--black);
+            background: var(--off);
+        }
+        .box-item-label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        .box-item-size {
+            font-size: 10px;
+            color: var(--mid);
+        }
+        .box-remove {
+            cursor: pointer;
+            color: var(--mid);
+            font-size: 14px;
+            padding: 0 2px;
+            transition: color 0.2s;
+        }
+        .box-remove:hover { color: var(--danger); }
+        .empty-boxes {
+            font-size: 12px;
+            color: var(--mid);
+            text-align: center;
+            padding: 16px;
+            background: var(--lightest);
+            border-radius: 6px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover {
+            background: var(--dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .save-btn {
+            width: 100%;
+            padding: 9px;
+            background: transparent;
+            color: var(--mid);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .save-btn:hover {
+            border-color: var(--black);
+            color: var(--black);
+        }
+        .instruction {
+            font-size: 12px;
+            color: var(--mid);
+            padding: 8px 12px;
+            background: var(--lightest);
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        .box-count-badge {
+            background: var(--lightest);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--mid);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            Nex<span>Label</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="annotator.html">
+                    ← Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="#" class="active">
+                    🔲 BBox Workspace
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div>
+                <h1 id="taskTitle">
+                    Loading task...
+                </h1>
+                <p style="color:var(--mid);
+                    font-size:13px;margin-top:2px;">
+                    Bounding Box Annotation
+                </p>
+            </div>
+            <div class="topbar-right">
+                <span id="userName"
+                    style="color:var(--mid);
+                    font-size:13px;">
+                </span>
+                <span class="role-badge">
+                    Annotator
+                </span>
+                <button class="btn btn-outline"
+                    onclick="logout()"
+                    style="padding:6px 14px;
+                    font-size:12px;">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="progress-steps"
+            id="progressSteps">
+        </div>
+
+        <div style="margin-top:16px">
+        <div class="workspace-layout">
+            <!-- Work Panel -->
+            <div class="work-panel">
+                <div class="task-header">
+                    <div class="task-title"
+                        id="itemTitle">
+                        Image 1 of 5
+                    </div>
+                    <div style="display:flex;
+                        gap:8px;align-items:center;">
+                        <span class="box-count-badge"
+                            id="boxCountBadge">
+                            0 boxes
+                        </span>
+                        <span class="badge
+                            badge-image">
+                            BBox
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <button class="tool-btn active"
+                        id="toolDraw"
+                        onclick="setTool('draw')">
+                        ✏️ Draw
+                    </button>
+                    <button class="tool-btn"
+                        id="toolSelect"
+                        onclick="setTool('select')">
+                        ↖ Select
+                    </button>
+                    <div class="tool-divider"></div>
+                    <button class="tool-btn"
+                        onclick="undoLast()">
+                        ↩ Undo
+                    </button>
+                    <button class="tool-btn"
+                        onclick="clearAll()">
+                        🗑 Clear
+                    </button>
+                    <div class="tool-divider"></div>
+                    <span style="font-size:12px;
+                        color:var(--mid);">
+                        Zoom:
+                    </span>
+                    <button class="tool-btn"
+                        onclick="zoom(1.2)">+</button>
+                    <button class="tool-btn"
+                        onclick="zoom(0.8)">−</button>
+                    <button class="tool-btn"
+                        onclick="resetZoom()">
+                        ↺
+                    </button>
+                </div>
+
+                <div class="instruction"
+                    id="instruction">
+                    Draw mode: Click and drag 
+                    to draw a bounding box. 
+                    Select a class first!
+                </div>
+
+                <!-- Canvas -->
+                <div class="canvas-wrap"
+                    id="canvasWrap">
+                    <canvas id="bbox-canvas">
+                    </canvas>
+                </div>
+
+                <!-- Nav -->
+                <div class="nav-row">
+                    <button class="btn btn-outline"
+                        onclick="prevItem()"
+                        id="prevBtn"
+                        style="display:none;
+                        padding:10px 20px;">
+                        ← Previous
+                    </button>
+                    <button class="btn btn-primary"
+                        onclick="nextItem()"
+                        id="nextBtn"
+                        style="padding:10px 20px;">
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Label Panel -->
+            <div class="label-panel">
+                <div class="panel-title">
+                    Active Class
+                </div>
+                <div class="class-list"
+                    id="classList">
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <div style="display:flex;
+                    justify-content:space-between;
+                    align-items:center;">
+                    <div class="panel-title">
+                        Boxes
+                    </div>
+                    <span class="box-count-badge"
+                        id="boxCountSide">
+                        0
+                    </span>
+                </div>
+
+                <div id="boxesList">
+                    <div class="empty-boxes">
+                        No boxes yet — draw on 
+                        the canvas to start
+                    </div>
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <button class="submit-btn"
+                    onclick="submitTask()"
+                    id="submitBtn">
+                    Submit for Review
+                </button>
+                <button class="save-btn"
+                    onclick="saveProgress()">
+                    Save progress
+                </button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+    // ══════════════════════
+    // STATE
+    // ══════════════════════
+    let canvas, ctx, wrap;
+    let tool = 'draw';
+    let isDrawing = false;
+    let startX, startY, currentX, currentY;
+    let scale = 1;
+    let offsetX = 0, offsetY = 0;
+    let currentItem = 0;
+    let selectedBox = -1;
+    let activeClass = 0;
+
+    const CLASSES = [
+        {name:'Person',    color:'#3b82f6',
+            light:'rgba(59,130,246,0.15)'},
+        {name:'Car',       color:'#10b981',
+            light:'rgba(16,185,129,0.15)'},
+        {name:'Object',    color:'#f59e0b',
+            light:'rgba(245,158,11,0.15)'},
+        {name:'Animal',    color:'#8b5cf6',
+            light:'rgba(139,92,246,0.15)'},
+        {name:'Text',      color:'#ef4444',
+            light:'rgba(239,68,68,0.15)'},
+        {name:'Other',     color:'#6b7280',
+            light:'rgba(107,114,128,0.15)'},
+    ];
+
+    const ITEMS = [
+        {id:1,name:'scene_001.jpg',
+            emoji:'🏙️',boxes:[]},
+        {id:2,name:'scene_002.jpg',
+            emoji:'🚗',boxes:[]},
+        {id:3,name:'scene_003.jpg',
+            emoji:'👥',boxes:[]},
+        {id:4,name:'scene_004.jpg',
+            emoji:'🐕',boxes:[]},
+        {id:5,name:'scene_005.jpg',
+            emoji:'🏪',boxes:[]},
+    ];
+
+    // ══════════════════════
+    // INIT
+    // ══════════════════════
+    window.onload = async function() {
+        try {
+            const profile = await requireAuth();
+            if (!profile) return;
+            loadUserInfo(profile);
+
+            const params = new URLSearchParams(
+                window.location.search
+            );
+            document.getElementById('taskTitle')
+                .textContent =
+                params.get('title') ||
+                'Bounding Box Task';
+
+            canvas = document
+                .getElementById('bbox-canvas');
+            ctx = canvas.getContext('2d');
+            wrap = document
+                .getElementById('canvasWrap');
+
+            resizeCanvas();
+            buildProgressSteps();
+            renderClasses();
+            loadItem(0);
+            setupEvents();
+
+            window.addEventListener(
+                'resize', resizeCanvas
+            );
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    function resizeCanvas() {
+        if (!wrap || !canvas) return;
+        canvas.width  = wrap.offsetWidth;
+        canvas.height = wrap.offsetHeight;
+        redraw();
+    }
+
+    function buildProgressSteps() {
+        document.getElementById('progressSteps')
+            .innerHTML = ITEMS.map((_,i) =>
+            `<div class="pstep ${
+                i===0?'current':''
+            }" id="pstep-${i}"></div>`
+        ).join('');
+    }
+
+    function renderClasses() {
+        document.getElementById('classList')
+            .innerHTML = CLASSES.map((c,i) => `
+            <button class="class-btn ${
+                activeClass===i?'active':''
+            }"
+            onclick="setClass(${i})"
+            style="${activeClass===i
+                ? `background:${c.color};
+                   border-color:${c.color};
+                   color:white;`
+                : `border-left:3px solid 
+                   ${c.color};`}">
+                <div class="class-btn-inner">
+                    <div class="class-color"
+                        style="background:${c.color}">
+                    </div>
+                    ${c.name}
+                </div>
+                <span style="font-size:10px;
+                    opacity:0.6;">
+                    [${i+1}]
+                </span>
+            </button>
+        `).join('');
+    }
+
+    function loadItem(index) {
+        currentItem = index;
+        selectedBox = -1;
+        document.getElementById('itemTitle')
+            .textContent =
+            `Image ${index+1} of ${ITEMS.length}`;
+
+        updateSteps(index);
+        updateBoxesList();
+        redraw();
+
+        document.getElementById('prevBtn')
+            .style.display =
+            index > 0 ? 'block' : 'none';
+        document.getElementById('nextBtn')
+            .textContent =
+            index === ITEMS.length-1
+            ? 'Last Item' : 'Next →';
+    }
+
+    // ══════════════════════
+    // CANVAS DRAWING
+    // ══════════════════════
+    function getPos(e) {
+        const rect =
+            canvas.getBoundingClientRect();
+        const clientX =
+            e.touches ? e.touches[0].clientX
+            : e.clientX;
+        const clientY =
+            e.touches ? e.touches[0].clientY
+            : e.clientY;
+        return {
+            x: (clientX - rect.left),
+            y: (clientY - rect.top)
+        };
+    }
+
+    function setupEvents() {
+        canvas.addEventListener('mousedown', onDown);
+        canvas.addEventListener('mousemove', onMove);
+        canvas.addEventListener('mouseup',   onUp);
+        canvas.addEventListener('touchstart',
+            e => { e.preventDefault(); onDown(e); },
+            {passive:false}
+        );
+        canvas.addEventListener('touchmove',
+            e => { e.preventDefault(); onMove(e); },
+            {passive:false}
+        );
+        canvas.addEventListener('touchend',
+            e => { e.preventDefault(); onUp(e); },
+            {passive:false}
+        );
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', e => {
+            if (e.target.tagName === 'TEXTAREA')
+                return;
+            const num = parseInt(e.key);
+            if (num >= 1 && num <= CLASSES.length) {
+                setClass(num - 1);
+            }
+            if (e.key === 'Delete' ||
+                e.key === 'Backspace') {
+                if (selectedBox >= 0) {
+                    removeBox(selectedBox);
+                }
+            }
+            if (e.key === 'z' && e.ctrlKey) {
+                undoLast();
+            }
+            if (e.key === 'd') setTool('draw');
+            if (e.key === 's') setTool('select');
+        });
+    }
+
+    function onDown(e) {
+        const pos = getPos(e);
+        startX = pos.x;
+        startY = pos.y;
+
+        if (tool === 'select') {
+            // Check if clicking on a box
+            const boxes =
+                ITEMS[currentItem].boxes;
+            let found = -1;
+            for (let i = boxes.length-1;
+                i >= 0; i--) {
+                const b = boxes[i];
+                if (pos.x >= b.x &&
+                    pos.x <= b.x + b.w &&
+                    pos.y >= b.y &&
+                    pos.y <= b.y + b.h) {
+                    found = i;
+                    break;
+                }
+            }
+            selectedBox = found;
+            updateBoxesList();
+            redraw();
+            return;
+        }
+
+        isDrawing = true;
+        currentX = startX;
+        currentY = startY;
+    }
+
+    function onMove(e) {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        currentX = pos.x;
+        currentY = pos.y;
+        redraw();
+
+        // Draw preview box
+        const x = Math.min(startX, currentX);
+        const y = Math.min(startY, currentY);
+        const w = Math.abs(currentX - startX);
+        const h = Math.abs(currentY - startY);
+        const c = CLASSES[activeClass];
+
+        ctx.strokeStyle = c.color;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 3]);
+        ctx.strokeRect(x, y, w, h);
+        ctx.fillStyle = c.light;
+        ctx.fillRect(x, y, w, h);
+        ctx.setLineDash([]);
+    }
+
+    function onUp(e) {
+        if (!isDrawing) return;
+        isDrawing = false;
+
+        const x = Math.min(startX, currentX);
+        const y = Math.min(startY, currentY);
+        const w = Math.abs(currentX - startX);
+        const h = Math.abs(currentY - startY);
+
+        // Only add if box is big enough
+        if (w > 10 && h > 10) {
+            ITEMS[currentItem].boxes.push({
+                x, y, w, h,
+                classIndex: activeClass,
+                label: CLASSES[activeClass].name
+            });
+            updateBoxCount();
+            updateBoxesList();
+        }
+
+        redraw();
+    }
+
+    function redraw() {
+        if (!ctx) return;
+        ctx.clearRect(
+            0, 0, canvas.width, canvas.height
+        );
+
+        // Draw background placeholder
+        ctx.fillStyle = '#f9fafb';
+        ctx.fillRect(
+            0, 0, canvas.width, canvas.height
+        );
+
+        // Draw image emoji placeholder
+        const item = ITEMS[currentItem];
+        ctx.font = '80px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.globalAlpha = 0.15;
+        ctx.fillText(
+            item.emoji,
+            canvas.width / 2,
+            canvas.height / 2
+        );
+        ctx.globalAlpha = 1;
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width;
+            x += 40) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height;
+            y += 40) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        }
+
+        // Draw all boxes
+        item.boxes.forEach((b, i) => {
+            const c = CLASSES[b.classIndex];
+            const isSelected = i === selectedBox;
+
+            // Fill
+            ctx.fillStyle = c.light;
+            ctx.fillRect(b.x, b.y, b.w, b.h);
+
+            // Border
+            ctx.strokeStyle = c.color;
+            ctx.lineWidth = isSelected ? 3 : 1.5;
+            ctx.setLineDash(
+                isSelected ? [6,3] : []
+            );
+            ctx.strokeRect(b.x, b.y, b.w, b.h);
+            ctx.setLineDash([]);
+
+            // Label tag
+            const tagH = 20;
+            ctx.fillStyle = c.color;
+            ctx.fillRect(
+                b.x, b.y - tagH,
+                ctx.measureText(b.label).width + 16,
+                tagH
+            );
+            ctx.fillStyle = '#ffffff';
+            ctx.font =
+                'bold 11px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+                b.label,
+                b.x + 6,
+                b.y - tagH/2
+            );
+
+            // Corner handles if selected
+            if (isSelected) {
+                const corners = [
+                    [b.x, b.y],
+                    [b.x+b.w, b.y],
+                    [b.x, b.y+b.h],
+                    [b.x+b.w, b.y+b.h]
+                ];
+                corners.forEach(([cx,cy]) => {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(
+                        cx-4, cy-4, 8, 8
+                    );
+                    ctx.strokeStyle = c.color;
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(
+                        cx-4, cy-4, 8, 8
+                    );
+                });
+            }
+        });
+    }
+
+    // ══════════════════════
+    // BOX MANAGEMENT
+    // ══════════════════════
+    function updateBoxesList() {
+        const boxes = ITEMS[currentItem].boxes;
+        const list = document
+            .getElementById('boxesList');
+
+        if (boxes.length === 0) {
+            list.innerHTML =
+                `<div class="empty-boxes">
+                    No boxes yet — draw on 
+                    the canvas to start
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = boxes.map((b,i) => {
+            const c = CLASSES[b.classIndex];
+            return `
+            <div class="box-item ${
+                i===selectedBox
+                ?'selected-box':''
+            }"
+            onclick="selectBox(${i})">
+                <div>
+                    <div class="box-item-label"
+                        style="color:${c.color}">
+                        ${b.label}
+                    </div>
+                    <div class="box-item-size">
+                        ${Math.round(b.w)} × 
+                        ${Math.round(b.h)} px
+                    </div>
+                </div>
+                <span class="box-remove"
+                    onclick="event.stopPropagation();
+                    removeBox(${i})">
+                    ×
+                </span>
+            </div>`;
+        }).join('');
+    }
+
+    function selectBox(index) {
+        selectedBox = index;
+        updateBoxesList();
+        redraw();
+    }
+
+    function removeBox(index) {
+        ITEMS[currentItem].boxes.splice(index, 1);
+        if (selectedBox >= index) {
+            selectedBox = -1;
+        }
+        updateBoxCount();
+        updateBoxesList();
+        redraw();
+    }
+
+    function undoLast() {
+        const boxes = ITEMS[currentItem].boxes;
+        if (boxes.length > 0) {
+            boxes.pop();
+            selectedBox = -1;
+            updateBoxCount();
+            updateBoxesList();
+            redraw();
+        }
+    }
+
+    function clearAll() {
+        if (!confirm('Clear all boxes?')) return;
+        ITEMS[currentItem].boxes = [];
+        selectedBox = -1;
+        updateBoxCount();
+        updateBoxesList();
+        redraw();
+    }
+
+    function updateBoxCount() {
+        const count =
+            ITEMS[currentItem].boxes.length;
+        document.getElementById('boxCountBadge')
+            .textContent =
+            `${count} box${count!==1?'es':''}`;
+        document.getElementById('boxCountSide')
+            .textContent = count;
+    }
+
+    // ══════════════════════
+    // TOOLS & CLASSES
+    // ══════════════════════
+    function setTool(t) {
+        tool = t;
+        document.getElementById('toolDraw')
+            .classList.toggle('active', t==='draw');
+        document.getElementById('toolSelect')
+            .classList.toggle('active', t==='select');
+        const wrap =
+            document.getElementById('canvasWrap');
+        wrap.style.cursor =
+            t==='draw' ? 'crosshair' : 'default';
+
+        const instr =
+            document.getElementById('instruction');
+        instr.textContent =
+            t === 'draw'
+            ? 'Draw mode: Click and drag to draw a box. Select a class first!'
+            : 'Select mode: Click a box to select it. Press Delete to remove.';
+    }
+
+    function setClass(index) {
+        activeClass = index;
+        renderClasses();
+    }
+
+    function zoom(factor) {
+        scale *= factor;
+        scale = Math.max(0.5,
+            Math.min(scale, 3));
+        canvas.style.transform =
+            `scale(${scale})`;
+        canvas.style.transformOrigin =
+            'top left';
+    }
+
+    function resetZoom() {
+        scale = 1;
+        canvas.style.transform = 'scale(1)';
+    }
+
+    // ══════════════════════
+    // NAVIGATION
+    // ══════════════════════
+    function nextItem() {
+        const boxes = ITEMS[currentItem].boxes;
+        if (boxes.length === 0) {
+            if (!confirm(
+                'No boxes drawn for this image.\n' +
+                'Continue anyway?'
+            )) return;
+        }
+        if (currentItem < ITEMS.length - 1) {
+            loadItem(currentItem + 1);
+        }
+    }
+
+    function prevItem() {
+        if (currentItem > 0) {
+            loadItem(currentItem - 1);
+        }
+    }
+
+    function updateSteps(index) {
+        ITEMS.forEach((_,i) => {
+            const s = document
+                .getElementById('pstep-'+i);
+            if (!s) return;
+            s.className = 'pstep';
+            if (i < index) s.classList.add('done');
+            if (i === index)
+                s.classList.add('current');
+        });
+    }
+
+    // ══════════════════════
+    // SUBMIT & SAVE
+    // ══════════════════════
+    async function submitTask() {
+        const totalBoxes = ITEMS.reduce(
+            (sum, item) =>
+            sum + item.boxes.length, 0
+        );
+        if (totalBoxes === 0) {
+            alert('Please draw at least ' +
+                'one bounding box!');
+            return;
+        }
+
+        const btn = document
+            .getElementById('submitBtn');
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+
+        try {
+            const params = new URLSearchParams(
+                window.location.search
+            );
+            const taskId = params.get('taskId');
+            if (taskId && taskId !== 'demo') {
+                await submitTask(taskId);
+            }
+            alert('✅ Task submitted!\n' +
+                `${totalBoxes} boxes annotated.\n` +
+                'Sent to reviewer queue.');
+            window.location.href =
+                'annotator.html';
+        } catch(e) {
+            alert('Error: ' + e.message);
+            btn.textContent = 'Submit for Review';
+            btn.disabled = false;
+        }
+    }
+
+    function saveProgress() {
+        localStorage.setItem(
+            'nexxlabel_bbox_progress',
+            JSON.stringify(ITEMS)
+        );
+        const btn = document
+            .querySelector('.save-btn');
+        btn.textContent = '✓ Saved!';
+        setTimeout(() =>
+            btn.textContent = 'Save progress',
+        2000);
+    }
+    </script>
+</body>
+</html>

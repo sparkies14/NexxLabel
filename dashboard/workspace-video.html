@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+        content="width=device-width, 
+        initial-scale=1.0">
+    <title>NexLabel — Video Annotation</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+        .work-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow: hidden;
+        }
+        .label-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .task-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .progress-steps {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .pstep {
+            flex: 1; height: 3px;
+            border-radius: 99px;
+            background: var(--lighter);
+            transition: background 0.3s;
+        }
+        .pstep.done { background: var(--black); }
+        .pstep.current {
+            background: var(--dark);
+            opacity: 0.5;
+        }
+        /* Video player */
+        .video-wrap {
+            flex: 1;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+        .video-placeholder-icon {
+            font-size: 56px;
+            opacity: 0.4;
+        }
+        .video-placeholder-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .video-placeholder-sub {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+        video {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+        /* Timeline */
+        .timeline-wrap {
+            flex-shrink: 0;
+            background: var(--off);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .timeline-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--mid);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .timeline-time {
+            font-size: 11px;
+            color: var(--mid);
+            font-family: 'Inter', monospace;
+        }
+        /* Scrubber */
+        .scrubber-wrap {
+            position: relative;
+            height: 32px;
+            margin-bottom: 8px;
+        }
+        .scrubber {
+            width: 100%;
+            height: 4px;
+            background: var(--lighter);
+            border-radius: 99px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        .scrubber-fill {
+            height: 100%;
+            background: var(--black);
+            border-radius: 99px;
+            transition: width 0.1s;
+        }
+        .scrubber-head {
+            position: absolute;
+            width: 14px; height: 14px;
+            background: var(--black);
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            transition: left 0.1s;
+            box-shadow: 0 1px 4px
+                rgba(0,0,0,0.2);
+        }
+        /* Annotation markers on timeline */
+        .timeline-markers {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+        .t-marker {
+            position: absolute;
+            width: 3px;
+            height: 100%;
+            border-radius: 99px;
+            top: 0;
+            transform: translateX(-50%);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        /* Controls */
+        .video-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .ctrl-btn {
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--white);
+            color: var(--dark);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+        .ctrl-btn:hover {
+            border-color: var(--black);
+            background: var(--lightest);
+        }
+        .ctrl-btn.play-btn {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+            min-width: 80px;
+        }
+        .ctrl-btn.play-btn:hover {
+            background: var(--dark);
+        }
+        .speed-select {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
+            color: var(--dark);
+            background: var(--white);
+            cursor: pointer;
+            outline: none;
+        }
+        /* Segments list */
+        .segments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .segment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--lightest);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .segment-item:hover {
+            border-color: var(--black);
+        }
+        .segment-label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        .segment-time {
+            font-size: 11px;
+            color: var(--mid);
+            font-family: 'Inter', monospace;
+        }
+        .segment-remove {
+            cursor: pointer;
+            color: var(--mid);
+            font-size: 14px;
+            padding: 0 2px;
+        }
+        .segment-remove:hover {
+            color: var(--danger);
+        }
+        .empty-segments {
+            font-size: 12px;
+            color: var(--mid);
+            text-align: center;
+            padding: 14px;
+            background: var(--lightest);
+            border-radius: 6px;
+        }
+        /* Label buttons */
+        .panel-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--black);
+        }
+        .panel-divider {
+            height: 1px;
+            background: var(--border);
+        }
+        .event-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .event-btn {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--dark);
+            cursor: pointer;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .event-btn:hover {
+            border-color: var(--black);
+            background: var(--lightest);
+        }
+        .event-btn-key {
+            font-size: 10px;
+            opacity: 0.5;
+            font-weight: 400;
+        }
+        .mark-btn {
+            width: 100%;
+            padding: 11px;
+            background: var(--lightest);
+            color: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mark-btn:hover {
+            border-color: var(--black);
+            background: var(--off);
+        }
+        .mark-btn.marking {
+            background: #fef2f2;
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover {
+            background: var(--dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px
+                rgba(0,0,0,0.12);
+        }
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .save-btn {
+            width: 100%;
+            padding: 9px;
+            background: transparent;
+            color: var(--mid);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .save-btn:hover {
+            border-color: var(--black);
+            color: var(--black);
+        }
+        .current-label-display {
+            padding: 8px 12px;
+            background: var(--lightest);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--mid);
+        }
+        .current-label-display strong {
+            color: var(--black);
+        }
+        .nav-row {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            Nex<span>Label</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="annotator.html">
+                    ← Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="#" class="active">
+                    🎥 Video Workspace
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div>
+                <h1 id="taskTitle">
+                    Loading task...
+                </h1>
+                <p style="color:var(--mid);
+                    font-size:13px;margin-top:2px;">
+                    Video Annotation Workspace
+                </p>
+            </div>
+            <div class="topbar-right">
+                <span id="userName"
+                    style="color:var(--mid);
+                    font-size:13px;">
+                </span>
+                <span class="role-badge">
+                    Annotator
+                </span>
+                <button class="btn btn-outline"
+                    onclick="logout()"
+                    style="padding:6px 14px;
+                    font-size:12px;">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="progress-steps"
+            id="progressSteps">
+        </div>
+
+        <div style="margin-top:16px">
+        <div class="workspace-layout">
+            <!-- Work Panel -->
+            <div class="work-panel">
+                <div class="task-header">
+                    <div class="task-title"
+                        id="itemTitle">
+                        Video 1 of 3
+                    </div>
+                    <div style="display:flex;
+                        gap:8px;align-items:center;">
+                        <span style="font-size:12px;
+                            color:var(--mid);"
+                            id="segmentCount">
+                            0 segments
+                        </span>
+                        <span class="badge
+                            badge-video">
+                            Video
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Video Player -->
+                <div class="video-wrap"
+                    id="videoWrap">
+                    <div class="video-placeholder"
+                        id="videoPlaceholder">
+                        <div
+                            class="video-placeholder-icon">
+                            🎥
+                        </div>
+                        <div
+                            class="video-placeholder-text">
+                            Video Preview
+                        </div>
+                        <div
+                            class="video-placeholder-sub"
+                            id="videoName">
+                            Loading...
+                        </div>
+                    </div>
+                    <video id="mainVideo"
+                        onended="onVideoEnd()"
+                        ontimeupdate="onTimeUpdate()">
+                    </video>
+                </div>
+
+                <!-- Timeline -->
+                <div class="timeline-wrap">
+                    <div class="timeline-header">
+                        <span class="timeline-title">
+                            Timeline
+                        </span>
+                        <span class="timeline-time"
+                            id="timeDisplay">
+                            0:00 / 0:00
+                        </span>
+                    </div>
+                    <div class="scrubber-wrap"
+                        id="scrubberWrap"
+                        onclick="scrubTo(event)">
+                        <div class="scrubber">
+                            <div class="scrubber-fill"
+                                id="scrubberFill"
+                                style="width:0%">
+                            </div>
+                        </div>
+                        <div class="scrubber-head"
+                            id="scrubberHead"
+                            style="left:0%">
+                        </div>
+                        <div class="timeline-markers"
+                            id="timelineMarkers">
+                        </div>
+                    </div>
+                    <div class="video-controls">
+                        <button class="ctrl-btn
+                            play-btn"
+                            id="playBtn"
+                            onclick="togglePlay()">
+                            ▶ Play
+                        </button>
+                        <button class="ctrl-btn"
+                            onclick="skipBack()">
+                            ⏮ -5s
+                        </button>
+                        <button class="ctrl-btn"
+                            onclick="skipFwd()">
+                            +5s ⏭
+                        </button>
+                        <button class="ctrl-btn"
+                            onclick="frameBack()">
+                            ◀ Frame
+                        </button>
+                        <button class="ctrl-btn"
+                            onclick="frameFwd()">
+                            Frame ▶
+                        </button>
+                        <select class="speed-select"
+                            onchange="setSpeed(
+                                this.value
+                            )">
+                            <option value="0.5">
+                                0.5×
+                            </option>
+                            <option value="1"
+                                selected>
+                                1×
+                            </option>
+                            <option value="1.5">
+                                1.5×
+                            </option>
+                            <option value="2">
+                                2×
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Nav -->
+                <div class="nav-row">
+                    <button class="btn btn-outline"
+                        onclick="prevItem()"
+                        id="prevBtn"
+                        style="display:none;
+                        padding:10px 20px;">
+                        ← Previous
+                    </button>
+                    <button class="btn btn-primary"
+                        onclick="nextItem()"
+                        id="nextBtn"
+                        style="padding:10px 20px;">
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Label Panel -->
+            <div class="label-panel">
+                <div class="panel-title">
+                    Mark Event
+                </div>
+                <div style="font-size:11px;
+                    color:var(--mid);">
+                    Select event type then mark
+                    start/end on the video
+                </div>
+
+                <div class="event-btns"
+                    id="eventBtns">
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <div class="current-label-display"
+                    id="currentLabelDisplay">
+                    <strong style="color:var(--mid)">
+                        No event selected
+                    </strong>
+                </div>
+
+                <button class="mark-btn"
+                    id="markBtn"
+                    onclick="toggleMark()">
+                    📍 Mark Start
+                </button>
+
+                <div class="panel-divider"></div>
+
+                <div style="display:flex;
+                    justify-content:space-between;
+                    align-items:center;">
+                    <div class="panel-title">
+                        Segments
+                    </div>
+                    <span style="font-size:11px;
+                        color:var(--mid);"
+                        id="segCountSide">
+                        0
+                    </span>
+                </div>
+
+                <div id="segmentsList">
+                    <div class="empty-segments">
+                        No segments yet — select 
+                        an event and mark start/end
+                    </div>
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <button class="submit-btn"
+                    onclick="submitTask()"
+                    id="submitBtn">
+                    Submit for Review
+                </button>
+                <button class="save-btn"
+                    onclick="saveProgress()">
+                    Save progress
+                </button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+    // ══════════════════════
+    // STATE
+    // ══════════════════════
+    let currentItem = 0;
+    let isMarking = false;
+    let markStart = null;
+    let activeEvent = null;
+    let videoEl = null;
+
+    const EVENTS = [
+        {label:'Action',      key:'1',
+            color:'#3b82f6'},
+        {label:'Speech',      key:'2',
+            color:'#10b981'},
+        {label:'Transition',  key:'3',
+            color:'#f59e0b'},
+        {label:'Object',      key:'4',
+            color:'#8b5cf6'},
+        {label:'Anomaly',     key:'5',
+            color:'#ef4444'},
+        {label:'Other',       key:'6',
+            color:'#6b7280'},
+    ];
+
+    const ITEMS = [
+        {id:1, name:'video_001.mp4',
+            src:null, emoji:'🏃',
+            desc:'Scene 1 — Action footage',
+            segments:[], duration:60},
+        {id:2, name:'video_002.mp4',
+            src:null, emoji:'🗣️',
+            desc:'Scene 2 — Interview clip',
+            segments:[], duration:45},
+        {id:3, name:'video_003.mp4',
+            src:null, emoji:'🚦',
+            desc:'Scene 3 — Traffic footage',
+            segments:[], duration:90},
+    ];
+
+    // ══════════════════════
+    // INIT
+    // ══════════════════════
+    window.onload = async function() {
+        try {
+            const profile = await requireAuth();
+            if (!profile) return;
+            loadUserInfo(profile);
+
+            const params = new URLSearchParams(
+                window.location.search
+            );
+            document.getElementById('taskTitle')
+                .textContent =
+                params.get('title') ||
+                'Video Annotation Task';
+
+            videoEl = document
+                .getElementById('mainVideo');
+
+            buildProgressSteps();
+            renderEvents();
+            loadItem(0);
+            setupKeys();
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    function buildProgressSteps() {
+        document.getElementById('progressSteps')
+            .innerHTML = ITEMS.map((_,i) =>
+            `<div class="pstep ${
+                i===0?'current':''
+            }" id="pstep-${i}"></div>`
+        ).join('');
+    }
+
+    function renderEvents() {
+        document.getElementById('eventBtns')
+            .innerHTML = EVENTS.map((e,i) => `
+            <button class="event-btn ${
+                activeEvent===i?'active':''
+            }"
+            style="${activeEvent===i
+                ? `background:${e.color};
+                   border-color:${e.color};
+                   color:white;`
+                : `border-left:3px solid
+                   ${e.color};`}"
+            onclick="setEvent(${i})">
+                ${e.label}
+                <span class="event-btn-key">
+                    [${e.key}]
+                </span>
+            </button>
+        `).join('');
+    }
+
+    function loadItem(index) {
+        currentItem = index;
+        isMarking = false;
+        markStart = null;
+        const item = ITEMS[index];
+
+        document.getElementById('itemTitle')
+            .textContent =
+            `Video ${index+1} of ${ITEMS.length}`;
+        document.getElementById('videoName')
+            .textContent = item.name;
+
+        // Load video if src available
+        if (item.src && videoEl) {
+            document.getElementById(
+                'videoPlaceholder'
+            ).style.display = 'none';
+            videoEl.style.display = 'block';
+            videoEl.src = item.src;
+            videoEl.load();
+        } else {
+            document.getElementById(
+                'videoPlaceholder'
+            ).style.display = 'flex';
+            document.getElementById(
+                'videoPlaceholder'
+            ).querySelector(
+                '.video-placeholder-icon'
+            ).textContent = item.emoji;
+            document.getElementById(
+                'videoPlaceholder'
+            ).querySelector(
+                '.video-placeholder-text'
+            ).textContent = item.desc;
+            videoEl.style.display = 'none';
+        }
+
+        resetMarkBtn();
+        updateSegmentsList();
+        updateSteps(index);
+
+        document.getElementById('prevBtn')
+            .style.display =
+            index > 0 ? 'block' : 'none';
+        document.getElementById('nextBtn')
+            .textContent =
+            index === ITEMS.length-1
+            ? 'Last Item' : 'Next →';
+    }
+
+    // ══════════════════════
+    // VIDEO CONTROLS
+    // ══════════════════════
+    function togglePlay() {
+        if (!videoEl.src) {
+            // Demo mode — simulate playback
+            simulatePlayback();
+            return;
+        }
+        if (videoEl.paused) {
+            videoEl.play();
+            document.getElementById('playBtn')
+                .textContent = '⏸ Pause';
+        } else {
+            videoEl.pause();
+            document.getElementById('playBtn')
+                .textContent = '▶ Play';
+        }
+    }
+
+    // Demo playback simulation
+    let simInterval = null;
+    let simTime = 0;
+    let simPlaying = false;
+    function simulatePlayback() {
+        if (simPlaying) {
+            clearInterval(simInterval);
+            simPlaying = false;
+            document.getElementById('playBtn')
+                .textContent = '▶ Play';
+            return;
+        }
+        simPlaying = true;
+        document.getElementById('playBtn')
+            .textContent = '⏸ Pause';
+        const dur = ITEMS[currentItem].duration;
+        simInterval = setInterval(() => {
+            simTime = Math.min(simTime+0.5, dur);
+            updateTimeDisplay(simTime, dur);
+            updateScrubber(simTime/dur);
+            if (simTime >= dur) {
+                clearInterval(simInterval);
+                simPlaying = false;
+                document.getElementById('playBtn')
+                    .textContent = '▶ Play';
+            }
+        }, 500);
+    }
+
+    function skipBack() {
+        if (videoEl.src) {
+            videoEl.currentTime =
+                Math.max(0,
+                videoEl.currentTime - 5);
+        } else {
+            simTime = Math.max(0, simTime - 5);
+            const dur =
+                ITEMS[currentItem].duration;
+            updateTimeDisplay(simTime, dur);
+            updateScrubber(simTime/dur);
+        }
+    }
+
+    function skipFwd() {
+        const dur = ITEMS[currentItem].duration;
+        if (videoEl.src) {
+            videoEl.currentTime =
+                Math.min(videoEl.duration,
+                videoEl.currentTime + 5);
+        } else {
+            simTime = Math.min(dur, simTime + 5);
+            updateTimeDisplay(simTime, dur);
+            updateScrubber(simTime/dur);
+        }
+    }
+
+    function frameBack() {
+        if (videoEl.src) {
+            videoEl.currentTime =
+                Math.max(0,
+                videoEl.currentTime - 0.033);
+        } else {
+            simTime = Math.max(0, simTime - 0.033);
+        }
+    }
+
+    function frameFwd() {
+        if (videoEl.src) {
+            videoEl.currentTime += 0.033;
+        } else {
+            const dur =
+                ITEMS[currentItem].duration;
+            simTime = Math.min(dur,
+                simTime + 0.033);
+        }
+    }
+
+    function setSpeed(v) {
+        if (videoEl.src) {
+            videoEl.playbackRate =
+                parseFloat(v);
+        }
+    }
+
+    function onTimeUpdate() {
+        const t = videoEl.currentTime;
+        const d = videoEl.duration || 1;
+        updateTimeDisplay(t, d);
+        updateScrubber(t/d);
+    }
+
+    function onVideoEnd() {
+        document.getElementById('playBtn')
+            .textContent = '▶ Play';
+    }
+
+    function scrubTo(e) {
+        const wrap = document
+            .getElementById('scrubberWrap');
+        const rect = wrap.getBoundingClientRect();
+        const pct = Math.max(0, Math.min(1,
+            (e.clientX - rect.left) / rect.width
+        ));
+        const dur = videoEl.src
+            ? videoEl.duration
+            : ITEMS[currentItem].duration;
+        if (videoEl.src) {
+            videoEl.currentTime = pct * dur;
+        } else {
+            simTime = pct * dur;
+            updateTimeDisplay(simTime, dur);
+            updateScrubber(pct);
+        }
+    }
+
+    function updateTimeDisplay(t, d) {
+        document.getElementById('timeDisplay')
+            .textContent =
+            `${fmt(t)} / ${fmt(d)}`;
+    }
+
+    function updateScrubber(pct) {
+        const p = (pct * 100).toFixed(1) + '%';
+        document.getElementById('scrubberFill')
+            .style.width = p;
+        document.getElementById('scrubberHead')
+            .style.left = p;
+    }
+
+    function fmt(s) {
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s % 60);
+        return `${m}:${sec.toString()
+            .padStart(2,'0')}`;
+    }
+
+    // ══════════════════════
+    // EVENT MARKING
+    // ══════════════════════
+    function setEvent(index) {
+        activeEvent = index;
+        renderEvents();
+        const e = EVENTS[index];
+        document.getElementById(
+            'currentLabelDisplay'
+        ).innerHTML =
+            `<strong style="color:${e.color}">
+                ${e.label}
+            </strong> selected`;
+        resetMarkBtn();
+    }
+
+    function toggleMark() {
+        if (activeEvent === null) {
+            alert('Please select an event type first!');
+            return;
+        }
+
+        const btn =
+            document.getElementById('markBtn');
+
+        if (!isMarking) {
+            // Start marking
+            isMarking = true;
+            markStart = videoEl.src
+                ? videoEl.currentTime
+                : simTime;
+            btn.textContent =
+                `🔴 Mark End (${fmt(markStart)})`;
+            btn.classList.add('marking');
+        } else {
+            // End marking
+            isMarking = false;
+            const end = videoEl.src
+                ? videoEl.currentTime
+                : simTime;
+            const start = markStart;
+
+            if (end <= start) {
+                alert('End time must be after' +
+                    ' start time!');
+                resetMarkBtn();
+                return;
+            }
+
+            const e = EVENTS[activeEvent];
+            ITEMS[currentItem].segments.push({
+                label: e.label,
+                color: e.color,
+                start: start,
+                end: end,
+                duration: end - start
+            });
+
+            resetMarkBtn();
+            updateSegmentsList();
+            renderTimelineMarkers();
+        }
+    }
+
+    function resetMarkBtn() {
+        isMarking = false;
+        markStart = null;
+        const btn =
+            document.getElementById('markBtn');
+        if (btn) {
+            btn.textContent = '📍 Mark Start';
+            btn.classList.remove('marking');
+        }
+    }
+
+    function renderTimelineMarkers() {
+        const segs =
+            ITEMS[currentItem].segments;
+        const dur = videoEl.src
+            ? (videoEl.duration || 60)
+            : ITEMS[currentItem].duration;
+        const markers = document
+            .getElementById('timelineMarkers');
+
+        markers.innerHTML = segs.map(s => {
+            const startPct =
+                (s.start/dur*100).toFixed(1);
+            const endPct =
+                (s.end/dur*100).toFixed(1);
+            const widthPct =
+                ((s.end-s.start)/dur*100)
+                .toFixed(1);
+            return `
+                <div class="t-marker"
+                    style="left:${startPct}%;
+                    width:${widthPct}%;
+                    background:${s.color};
+                    opacity:0.5;
+                    height:100%;
+                    position:absolute;
+                    top:0;">
+                </div>`;
+        }).join('');
+    }
+
+    function updateSegmentsList() {
+        const segs =
+            ITEMS[currentItem].segments;
+        const list =
+            document.getElementById(
+                'segmentsList'
+            );
+        const count = segs.length;
+
+        document.getElementById('segmentCount')
+            .textContent =
+            `${count} segment${count!==1?'s':''}`;
+        document.getElementById('segCountSide')
+            .textContent = count;
+
+        if (segs.length === 0) {
+            list.innerHTML =
+                `<div class="empty-segments">
+                    No segments yet — select 
+                    an event and mark start/end
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = segs.map((s,i) => `
+            <div class="segment-item">
+                <div>
+                    <div class="segment-label"
+                        style="color:${s.color}">
+                        ${s.label}
+                    </div>
+                    <div class="segment-time">
+                        ${fmt(s.start)} → 
+                        ${fmt(s.end)}
+                        (${fmt(s.duration)})
+                    </div>
+                </div>
+                <span class="segment-remove"
+                    onclick="removeSegment(${i})">
+                    ×
+                </span>
+            </div>
+        `).join('');
+    }
+
+    function removeSegment(index) {
+        ITEMS[currentItem].segments
+            .splice(index, 1);
+        updateSegmentsList();
+        renderTimelineMarkers();
+    }
+
+    // ══════════════════════
+    // NAVIGATION
+    // ══════════════════════
+    function nextItem() {
+        const segs =
+            ITEMS[currentItem].segments;
+        if (segs.length === 0) {
+            if (!confirm(
+                'No segments marked for ' +
+                'this video.\nContinue anyway?'
+            )) return;
+        }
+        if (simInterval) {
+            clearInterval(simInterval);
+            simPlaying = false;
+        }
+        simTime = 0;
+        if (currentItem < ITEMS.length-1) {
+            loadItem(currentItem + 1);
+        }
+    }
+
+    function prevItem() {
+        if (simInterval) {
+            clearInterval(simInterval);
+            simPlaying = false;
+        }
+        simTime = 0;
+        if (currentItem > 0) {
+            loadItem(currentItem - 1);
+        }
+    }
+
+    function updateSteps(index) {
+        ITEMS.forEach((_,i) => {
+            const s = document
+                .getElementById('pstep-'+i);
+            if (!s) return;
+            s.className = 'pstep';
+            if (i < index) s.classList.add('done');
+            if (i === index)
+                s.classList.add('current');
+        });
+    }
+
+    // ══════════════════════
+    // KEYBOARD SHORTCUTS
+    // ══════════════════════
+    function setupKeys() {
+        document.addEventListener('keydown', e => {
+            if (e.target.tagName === 'SELECT' ||
+                e.target.tagName === 'TEXTAREA')
+                return;
+            const num = parseInt(e.key);
+            if (num >= 1 &&
+                num <= EVENTS.length) {
+                setEvent(num - 1);
+            }
+            if (e.key === ' ') {
+                e.preventDefault();
+                togglePlay();
+            }
+            if (e.key === 'm') toggleMark();
+            if (e.key === 'ArrowLeft') skipBack();
+            if (e.key === 'ArrowRight') skipFwd();
+        });
+    }
+
+    // ══════════════════════
+    // SUBMIT & SAVE
+    // ══════════════════════
+    async function submitTask() {
+        const total = ITEMS.reduce(
+            (s,i) => s + i.segments.length, 0
+        );
+        if (total === 0) {
+            alert('Please mark at least one ' +
+                'segment before submitting!');
+            return;
+        }
+        const btn = document
+            .getElementById('submitBtn');
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+        try {
+            const params = new URLSearchParams(
+                window.location.search
+            );
+            const taskId = params.get('taskId');
+            if (taskId && taskId !== 'demo') {
+                await submitTask(taskId);
+            }
+            alert('✅ Task submitted!\n' +
+                `${total} segments annotated.\n` +
+                'Sent to reviewer queue.');
+            window.location.href =
+                'annotator.html';
+        } catch(e) {
+            alert('Error: ' + e.message);
+            btn.textContent = 'Submit for Review';
+            btn.disabled = false;
+        }
+    }
+
+    function saveProgress() {
+        localStorage.setItem(
+            'nexxlabel_video_progress',
+            JSON.stringify(ITEMS)
+        );
+        const btn = document
+            .querySelector('.save-btn');
+        btn.textContent = '✓ Saved!';
+        setTimeout(() =>
+            btn.textContent = 'Save progress',
+        2000);
+    }
+    </script>
+</body>
+</html>

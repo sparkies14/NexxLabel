@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+        content="width=device-width, 
+        initial-scale=1.0">
+    <title>NexLabel — Text Annotation</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+        .work-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 28px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .label-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            height: fit-content;
+            position: sticky;
+            top: 0;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .task-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--black);
+        }
+        .task-counter {
+            font-size: 12px;
+            color: var(--mid);
+            font-weight: 500;
+        }
+        /* Progress steps */
+        .progress-steps {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+        .pstep {
+            flex: 1;
+            height: 3px;
+            border-radius: 99px;
+            background: var(--lighter);
+            transition: background 0.3s;
+        }
+        .pstep.done { background: var(--black); }
+        .pstep.current {
+            background: var(--dark);
+            opacity: 0.5;
+        }
+        /* Text content */
+        .text-box {
+            background: var(--off);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            font-size: 16px;
+            line-height: 1.9;
+            color: var(--dark);
+            min-height: 200px;
+            user-select: text;
+            cursor: text;
+        }
+        /* Highlighted spans */
+        .highlight {
+            border-radius: 3px;
+            padding: 1px 3px;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+        }
+        .highlight:hover::after {
+            content: '✕';
+            margin-left: 4px;
+            font-size: 10px;
+            opacity: 0.6;
+        }
+        /* Label buttons */
+        .label-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .label-btn {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--dark);
+            cursor: pointer;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'Inter', sans-serif;
+        }
+        .label-btn:hover {
+            border-color: var(--black);
+            background: var(--lightest);
+        }
+        .label-btn.selected {
+            border-color: var(--black);
+            background: var(--black);
+            color: var(--white);
+        }
+        .label-key {
+            font-size: 11px;
+            opacity: 0.5;
+            font-weight: 400;
+        }
+        /* Annotations list */
+        .annotations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .annotation-tag {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--lightest);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .annotation-tag-text {
+            font-weight: 500;
+            color: var(--dark);
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .annotation-tag-label {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .annotation-tag-remove {
+            cursor: pointer;
+            color: var(--mid);
+            font-size: 14px;
+            padding: 0 4px;
+            transition: color 0.2s;
+        }
+        .annotation-tag-remove:hover {
+            color: var(--danger);
+        }
+        /* Nav buttons */
+        .nav-row {
+            display: flex;
+            gap: 10px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .notes-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: var(--dark);
+            background: var(--white);
+            resize: none;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .notes-input:focus {
+            border-color: var(--black);
+        }
+        .panel-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--black);
+            letter-spacing: 0.3px;
+        }
+        .panel-divider {
+            height: 1px;
+            background: var(--border);
+        }
+        .selected-display {
+            padding: 10px 14px;
+            background: var(--lightest);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--mid);
+        }
+        .selected-display strong {
+            color: var(--black);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover {
+            background: var(--dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .save-btn {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            color: var(--mid);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .save-btn:hover {
+            border-color: var(--black);
+            color: var(--black);
+        }
+        /* Mode toggle */
+        .mode-toggle {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        .mode-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            color: var(--mid);
+            background: var(--white);
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+        .instruction {
+            font-size: 12px;
+            color: var(--mid);
+            line-height: 1.5;
+            padding: 10px 14px;
+            background: var(--lightest);
+            border-radius: 6px;
+            border-left: 3px solid var(--lighter);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            Nex<span>Label</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="annotator.html">
+                    ← Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="#" class="active">
+                    ✏️ Text Workspace
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div>
+                <h1 id="taskTitle">
+                    Loading task...
+                </h1>
+                <p style="color:var(--mid);
+                    font-size:13px;margin-top:2px;">
+                    Text Annotation Workspace
+                </p>
+            </div>
+            <div class="topbar-right">
+                <span id="userName"
+                    style="color:var(--mid);
+                    font-size:13px;">
+                </span>
+                <span class="role-badge">
+                    Annotator
+                </span>
+                <button class="btn btn-outline"
+                    onclick="logout()"
+                    style="padding:6px 14px;
+                    font-size:12px;">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps"
+            id="progressSteps">
+        </div>
+
+        <div class="workspace-layout">
+            <!-- Work Panel -->
+            <div class="work-panel">
+                <div class="task-header">
+                    <div class="task-title"
+                        id="itemTitle">
+                        Item 1 of 5
+                    </div>
+                    <div style="display:flex;
+                        align-items:center;gap:12px;">
+                        <div class="task-counter"
+                            id="taskCounter">
+                        </div>
+                        <div style="display:flex;
+                            gap:6px;">
+                            <span class="badge
+                                badge-text">
+                                Text
+                            </span>
+                            <span class="badge
+                                badge-medium"
+                                id="priorityBadge">
+                                Medium
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mode Toggle -->
+                <div>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active"
+                            onclick="setMode(
+                                'classify', this
+                            )">
+                            Classify
+                        </button>
+                        <button class="mode-btn"
+                            onclick="setMode(
+                                'highlight', this
+                            )">
+                            Highlight & Tag
+                        </button>
+                    </div>
+                    <div class="instruction"
+                        id="instruction">
+                        Read the text and select 
+                        the correct label below.
+                    </div>
+                </div>
+
+                <!-- Text Content -->
+                <div class="text-box"
+                    id="textContent"
+                    onmouseup="handleTextSelect()">
+                    Loading content...
+                </div>
+
+                <!-- Annotations made -->
+                <div id="annotationsArea"
+                    style="display:none;">
+                    <div class="panel-title"
+                        style="margin-bottom:8px;">
+                        Annotations
+                    </div>
+                    <div class="annotations-list"
+                        id="annotationsList">
+                    </div>
+                </div>
+
+                <!-- Nav buttons -->
+                <div class="nav-row">
+                    <button class="btn btn-outline"
+                        onclick="prevItem()"
+                        id="prevBtn"
+                        style="display:none;
+                        padding:10px 20px;">
+                        ← Previous
+                    </button>
+                    <button class="btn btn-primary"
+                        onclick="nextItem()"
+                        id="nextBtn"
+                        style="padding:10px 20px;">
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Label Panel -->
+            <div class="label-panel">
+                <div class="panel-title">
+                    Labels
+                </div>
+
+                <!-- Keyboard shortcut hint -->
+                <div style="font-size:11px;
+                    color:var(--mid);">
+                    Press key to select quickly
+                </div>
+
+                <div class="label-options"
+                    id="labelOptions">
+                    <!-- Labels loaded dynamically -->
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <div class="panel-title">
+                    Selected
+                </div>
+                <div class="selected-display"
+                    id="selectedDisplay">
+                    <strong>None</strong>
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <div class="panel-title">
+                    Notes
+                </div>
+                <textarea class="notes-input"
+                    id="notesInput"
+                    rows="3"
+                    placeholder="Optional notes...">
+                </textarea>
+
+                <div class="panel-divider"></div>
+
+                <button class="submit-btn"
+                    onclick="submitTask()"
+                    id="submitBtn">
+                    Submit for Review
+                </button>
+                <button class="save-btn"
+                    onclick="saveProgress()">
+                    Save progress
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+    // ══════════════════════
+    // WORKSPACE STATE
+    // ══════════════════════
+    let currentItem = 0;
+    let currentMode = 'classify';
+    let annotations = [];
+    let taskProfile = null;
+    let taskData = null;
+
+    // Label sets per task type
+    const LABEL_SETS = {
+        sentiment: [
+            {label:'Positive', key:'1',
+                color:'#dcfce7', text:'#16a34a'},
+            {label:'Negative', key:'2',
+                color:'#fef2f2', text:'#dc2626'},
+            {label:'Neutral',  key:'3',
+                color:'#f0f9ff', text:'#0369a1'},
+            {label:'Mixed',    key:'4',
+                color:'#faf5ff', text:'#7c3aed'},
+        ],
+        ner: [
+            {label:'Person',       key:'1',
+                color:'#eff6ff', text:'#1d4ed8'},
+            {label:'Organization', key:'2',
+                color:'#f0fdf4', text:'#15803d'},
+            {label:'Location',     key:'3',
+                color:'#fffbeb', text:'#b45309'},
+            {label:'Date/Time',    key:'4',
+                color:'#fdf4ff', text:'#9333ea'},
+            {label:'Other',        key:'5',
+                color:'#f3f4f6', text:'#6b7280'},
+        ],
+        classification: [
+            {label:'Category A', key:'1',
+                color:'#eff6ff', text:'#1d4ed8'},
+            {label:'Category B', key:'2',
+                color:'#f0fdf4', text:'#15803d'},
+            {label:'Category C', key:'3',
+                color:'#fffbeb', text:'#b45309'},
+            {label:'Category D', key:'4',
+                color:'#fdf4ff', text:'#9333ea'},
+        ],
+    };
+
+    // Sample items (replace with Supabase data)
+    const SAMPLE_ITEMS = [
+        {
+            id:1,
+            text:"The product arrived quickly and was exactly as described. The packaging was excellent and I was very happy with my purchase. Will definitely order again soon!",
+            type:'sentiment', label:null, highlights:[]
+        },
+        {
+            id:2,
+            text:"Apple Inc. announced a new product line yesterday. CEO Tim Cook presented at their headquarters in Cupertino, California. The event took place on September 12, 2024.",
+            type:'ner', label:null, highlights:[]
+        },
+        {
+            id:3,
+            text:"Terrible customer service experience. I waited 3 weeks for my order and when it finally arrived, two items were damaged. The company refused to offer a refund.",
+            type:'sentiment', label:null, highlights:[]
+        },
+        {
+            id:4,
+            text:"The quarterly report shows a 15% increase in revenue compared to last year. Management expects continued growth through Q4 as new markets open up.",
+            type:'classification', label:null,
+            highlights:[]
+        },
+        {
+            id:5,
+            text:"Overall the experience was okay. Some things were good but other aspects could definitely be improved. Not bad but not great either.",
+            type:'sentiment', label:null, highlights:[]
+        },
+    ];
+
+    // ══════════════════════
+    // INIT
+    // ══════════════════════
+    window.onload = async function() {
+        try {
+            const profile = await requireAuth();
+            if (!profile) return;
+            taskProfile = profile;
+            loadUserInfo(profile);
+
+            // Get task info from URL
+            const params = new URLSearchParams(
+                window.location.search
+            );
+            const taskId = params.get('taskId');
+            const title = params.get('title') ||
+                'Text Annotation Task';
+
+            document.getElementById('taskTitle')
+                .textContent = title;
+
+            buildProgressSteps();
+            loadItem(0);
+            setupKeyboardShortcuts();
+
+        } catch(e) {
+            console.error('Init error:', e);
+        }
+    }
+
+    // ══════════════════════
+    // UI BUILDERS
+    // ══════════════════════
+    function buildProgressSteps() {
+        const c = document
+            .getElementById('progressSteps');
+        c.innerHTML = SAMPLE_ITEMS.map((_,i) =>
+            `<div class="pstep ${
+                i===0?'current':''
+            }" id="pstep-${i}"></div>`
+        ).join('');
+    }
+
+    function loadItem(index) {
+        currentItem = index;
+        const item = SAMPLE_ITEMS[index];
+        annotations = item.highlights || [];
+
+        // Update text
+        document.getElementById('textContent')
+            .innerHTML = item.text;
+        document.getElementById('itemTitle')
+            .textContent =
+            `Item ${index+1} of ${SAMPLE_ITEMS.length}`;
+        document.getElementById('taskCounter')
+            .textContent =
+            `${SAMPLE_ITEMS.filter(i=>i.label).length
+            } labeled`;
+
+        // Load label set
+        renderLabels(LABEL_SETS[item.type] ||
+            LABEL_SETS.classification);
+
+        // Update selected
+        updateSelected(item.label);
+
+        // Update nav
+        document.getElementById('prevBtn')
+            .style.display =
+            index > 0 ? 'block' : 'none';
+        const isLast =
+            index === SAMPLE_ITEMS.length - 1;
+        const nextBtn =
+            document.getElementById('nextBtn');
+        nextBtn.textContent =
+            isLast ? 'Last Item' : 'Next →';
+        nextBtn.disabled = isLast &&
+            SAMPLE_ITEMS.every(i => i.label);
+
+        // Update steps
+        SAMPLE_ITEMS.forEach((_,i) => {
+            const s = document
+                .getElementById('pstep-'+i);
+            if (!s) return;
+            s.className = 'pstep';
+            if (i < index) s.classList.add('done');
+            if (i === index)
+                s.classList.add('current');
+        });
+
+        // Render highlights
+        renderHighlights();
+        updateAnnotationsList();
+
+        // Update instruction
+        updateInstruction();
+    }
+
+    function renderLabels(labelSet) {
+        const c = document
+            .getElementById('labelOptions');
+        c.innerHTML = labelSet.map(l => `
+            <button class="label-btn ${
+                SAMPLE_ITEMS[currentItem].label
+                === l.label ? 'selected' : ''
+            }"
+            onclick="selectLabel('${l.label}')"
+            style="${
+                SAMPLE_ITEMS[currentItem].label
+                === l.label
+                ? '' : `--hover-bg:${l.color};`
+            }">
+                ${l.label}
+                <span class="label-key">
+                    [${l.key}]
+                </span>
+            </button>
+        `).join('');
+    }
+
+    function updateSelected(label) {
+        const d = document
+            .getElementById('selectedDisplay');
+        if (label) {
+            d.innerHTML =
+                `<strong>${label}</strong>`;
+            d.style.background =
+                'var(--lightest)';
+        } else {
+            d.innerHTML =
+                `<strong style="color:var(--mid)">
+                    None selected
+                </strong>`;
+        }
+    }
+
+    function updateInstruction() {
+        const el = document
+            .getElementById('instruction');
+        if (currentMode === 'classify') {
+            el.textContent =
+                'Read the text and select ' +
+                'the correct label below.';
+        } else {
+            el.textContent =
+                'Select text with your mouse, ' +
+                'then click a label to tag it.';
+        }
+    }
+
+    // ══════════════════════
+    // LABEL SELECTION
+    // ══════════════════════
+    function selectLabel(label) {
+        SAMPLE_ITEMS[currentItem].label = label;
+        updateSelected(label);
+        renderLabels(
+            LABEL_SETS[
+                SAMPLE_ITEMS[currentItem].type
+            ] || LABEL_SETS.classification
+        );
+
+        // If in highlight mode add to annotations
+        if (currentMode === 'highlight') {
+            const sel = window.getSelection();
+            if (sel && sel.toString().trim()) {
+                addHighlight(
+                    sel.toString().trim(), label
+                );
+                sel.removeAllRanges();
+            }
+        }
+    }
+
+    // ══════════════════════
+    // HIGHLIGHT MODE
+    // ══════════════════════
+    function setMode(mode, btn) {
+        currentMode = mode;
+        document.querySelectorAll('.mode-btn')
+            .forEach(b =>
+                b.classList.remove('active'));
+        btn.classList.add('active');
+        updateInstruction();
+    }
+
+    function handleTextSelect() {
+        if (currentMode !== 'highlight') return;
+        const sel = window.getSelection();
+        if (!sel || !sel.toString().trim()) return;
+        // Selection handled on label click
+    }
+
+    function addHighlight(text, label) {
+        const item = SAMPLE_ITEMS[currentItem];
+        const labelSet =
+            LABEL_SETS[item.type] ||
+            LABEL_SETS.classification;
+        const labelInfo = labelSet.find(
+            l => l.label === label
+        );
+        const color = labelInfo
+            ? labelInfo.color : '#f3f4f6';
+        const textColor = labelInfo
+            ? labelInfo.text : '#374151';
+
+        item.highlights.push(
+            {text, label, color, textColor}
+        );
+        renderHighlights();
+        updateAnnotationsList();
+    }
+
+    function renderHighlights() {
+        const item = SAMPLE_ITEMS[currentItem];
+        let html = item.text;
+        item.highlights.forEach((h, i) => {
+            html = html.replace(
+                h.text,
+                `<span class="highlight"
+                    style="background:${h.color};
+                    color:${h.textColor};"
+                    onclick="removeHighlight(${i})"
+                    title="Click to remove">
+                    ${h.text}
+                 </span>`
+            );
+        });
+        document.getElementById('textContent')
+            .innerHTML = html;
+    }
+
+    function removeHighlight(index) {
+        SAMPLE_ITEMS[currentItem]
+            .highlights.splice(index, 1);
+        renderHighlights();
+        updateAnnotationsList();
+    }
+
+    function updateAnnotationsList() {
+        const item = SAMPLE_ITEMS[currentItem];
+        const area = document
+            .getElementById('annotationsArea');
+        const list = document
+            .getElementById('annotationsList');
+
+        if (item.highlights.length === 0) {
+            area.style.display = 'none';
+            return;
+        }
+
+        area.style.display = 'block';
+        list.innerHTML = item.highlights
+            .map((h, i) => `
+            <div class="annotation-tag">
+                <span class="annotation-tag-text"
+                    title="${h.text}">
+                    "${h.text}"
+                </span>
+                <span class="annotation-tag-label"
+                    style="background:${h.color};
+                    color:${h.textColor};">
+                    ${h.label}
+                </span>
+                <span class="annotation-tag-remove"
+                    onclick="removeHighlight(${i})">
+                    ×
+                </span>
+            </div>
+        `).join('');
+    }
+
+    // ══════════════════════
+    // NAVIGATION
+    // ══════════════════════
+    function nextItem() {
+        if (!SAMPLE_ITEMS[currentItem].label) {
+            alert('Please select a label first!');
+            return;
+        }
+        if (currentItem < SAMPLE_ITEMS.length-1) {
+            loadItem(currentItem + 1);
+        }
+    }
+
+    function prevItem() {
+        if (currentItem > 0) {
+            loadItem(currentItem - 1);
+        }
+    }
+
+    // ══════════════════════
+    // KEYBOARD SHORTCUTS
+    // ══════════════════════
+    function setupKeyboardShortcuts() {
+        document.addEventListener('keydown', e => {
+            // Don't fire if typing in textarea
+            if (e.target.tagName === 'TEXTAREA')
+                return;
+            const item = SAMPLE_ITEMS[currentItem];
+            const labelSet =
+                LABEL_SETS[item.type] ||
+                LABEL_SETS.classification;
+            const found = labelSet.find(
+                l => l.key === e.key
+            );
+            if (found) selectLabel(found.label);
+            if (e.key === 'ArrowRight') nextItem();
+            if (e.key === 'ArrowLeft') prevItem();
+        });
+    }
+
+    // ══════════════════════
+    // SUBMIT & SAVE
+    // ══════════════════════
+    async function submitTask() {
+        const unlabeled = SAMPLE_ITEMS.filter(
+            i => !i.label
+        );
+        if (unlabeled.length > 0) {
+            alert(`${unlabeled.length} items still 
+                need labels!`);
+            return;
+        }
+
+        const btn = document
+            .getElementById('submitBtn');
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+
+        try {
+            // Submit to Supabase if real task
+            const params = new URLSearchParams(
+                window.location.search
+            );
+            const taskId = params.get('taskId');
+            if (taskId && taskId !== 'demo') {
+                await submitTask(taskId);
+            }
+
+            alert('✅ Task submitted!\n' +
+                'Your work has been sent ' +
+                'to the reviewer.');
+            window.location.href =
+                'annotator.html';
+
+        } catch(e) {
+            alert('Error: ' + e.message);
+            btn.textContent = 'Submit for Review';
+            btn.disabled = false;
+        }
+    }
+
+    function saveProgress() {
+        localStorage.setItem(
+            'nexxlabel_text_progress',
+            JSON.stringify(SAMPLE_ITEMS)
+        );
+        const btn = document
+            .querySelector('.save-btn');
+        btn.textContent = '✓ Saved!';
+        setTimeout(() => {
+            btn.textContent = 'Save progress';
+        }, 2000);
+    }
+    </script>
+</body>
+</html>
